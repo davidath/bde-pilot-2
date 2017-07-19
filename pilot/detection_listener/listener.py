@@ -21,6 +21,7 @@ import gzip
 from sklearn.preprocessing import maxabs_scale, scale, minmax_scale
 from scipy.ndimage.filters import gaussian_filter
 import scipy.misc
+from shapely.geometry import shape, Point, Polygon, mapping, MultiPolygon
 
 BOOTSTRAP_SERVE_LOCAL = True
 app = Flask(__name__)
