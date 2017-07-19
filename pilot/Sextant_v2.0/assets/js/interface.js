@@ -626,13 +626,13 @@ function estimateLocation() {
               }
               else {
                 var req = new XMLHttpRequest();
-                req.open("POST", listener_ip+"class_detections/" + timestamp + "/" + pollcheckedVal() + "/" + metriccheckedVal() + "/" + methodcheckedVal(), true);
+                req.open("POST", listener_ip+"class_detections/" + timestamp + "/" + pollcheckedVal() + "/cosine/" + methodcheckedVal(), true);
                 req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
                 req.send(JSON.stringify(locs));
               }
               req.onloadend = function() {
                   resp = JSON.parse(req.responseText);
-              if (resp["scores"][0]-resp["scores"][2] !=0  && metriccheckedVal() == 'cosine') {
+              if (resp["scores"][0]-resp["scores"][2] !=0) {
                     res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th></tr>';
                     for (var i=0; i<resp['scores'].length;i++){
                         if (resp['scores'][i] != 0) {
