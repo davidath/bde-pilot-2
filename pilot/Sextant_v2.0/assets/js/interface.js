@@ -616,6 +616,7 @@ function estimateLocation() {
               var loader = document.getElementById('loader_ic');
               var eheader = document.getElementById('estimate');
               var slider = document.getElementById('slider');
+              var thres = document.getElementById('thres');
               loader.style.display = 'block';
               eheader.style.display = 'none';
               slider.style.display = 'none';
@@ -652,6 +653,7 @@ function estimateLocation() {
                     popreq.onloadend = function() {
                          resp = JSON.parse(popreq.responseText);
                          slider.style.display = 'block';
+                         thres.style.display = 'block';
                     }
                 }
               else {
@@ -743,7 +745,7 @@ function drawDispersion(idx){
      var slider = document.getElementById('slider');
      slider.min = min;
      slider.max = max;
-     
+
 }
 
 

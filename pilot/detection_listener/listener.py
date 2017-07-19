@@ -500,7 +500,7 @@ def population():
         affected_ids = list(set(affected_ids))
         population_tag = []
         for id in affected_ids:
-            population_tag.append(random.randomint(0,10000))
+            population_tag.append(random.randint(0,10000))
         jpols = []
         for id in affected_ids:
             jpols.append(dict(type='Feature', properties={"POP":unicode(population_tag[id])}, geometry=mapping(cell_pols[id]['obj'])))
