@@ -493,10 +493,10 @@ def population():
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
     affected_ids = list(set(affected_ids))
-    population_tag = range(len(affected_ids))
+    # population_tag = range(len(affected_ids))
     jpols = []
     for id in affected_ids:
-        jpols.append(dict(type='Feature', properties={"POP":unicode(population_tag[id])}, geometry=mapping(cell_pols[id]['obj'])))
+        jpols.append(dict(type='Feature', properties={"POP":unicode(1000)}, geometry=mapping(cell_pols[id]['obj'])))
     end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
     return json.dumps(end_res)
 
