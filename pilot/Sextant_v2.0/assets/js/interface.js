@@ -648,6 +648,7 @@ function estimateLocation() {
                      alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
                      loader.style.display = 'none';
                      eheader.style.display = 'block';
+                     calc_population();
                   }
               };
       }else {
@@ -656,12 +657,11 @@ function estimateLocation() {
     } else {
         alert('You should choose a weather file, pollutant & clustering method before estimating the source\'s location');
     }
-    calc_population();
 }
 
 
 function calc_population(){
-  var slider = document.getElementById('loader_ic');
+  var slider = document.getElementById('slider');
   slider.style.display = 'block';
   var affected = [];
   for (var i=0; i<resp['dispersions'].length;i++){
