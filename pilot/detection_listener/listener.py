@@ -41,7 +41,6 @@ APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 def load_gridcells():
-    urllib.urlretrieve('http://localhost:9999/Sextant_v2.0/data/dispersion_grid.json', 'dispersion_grid.json')
     with open('dispersion_grid.json') as ff:
     cells = json.load(ff)
 
