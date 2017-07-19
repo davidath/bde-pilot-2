@@ -40,6 +40,25 @@ dpass = getpass.getpass()
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
+def load_gridcells():
+    urllib.urlretrieve('http://localhost:9999/Sextant_v2.0/data/dispersion_grid.json', 'dispersion_grid.json')
+    with open('dispersion_grid.json') as ff:
+    cells = json.load(ff)
+
+    cell_pols = []
+    for cell in cells:
+        points = []
+        points.append(Point(float(cell['bottom_left']['lon']),float(cell['bottom_left']['lat'])))
+        points.append(Point(float(cell['top_left']['lon']),float(cell['top_left']['lat'])))
+        points.append(Point(float(cell['top_right']['lon']),float(cell['top_right']['lat'])))
+        points.append(Point(float(cell['bottom_right']['lon']),float(cell['bottom_right']['lat'])))
+        pol = Polygon([[p.x, p.y] for p in points])
+        cell_pol = {}
+        cell_pol['id'] = cell['id']
+        cell_pol['obj'] = pol
+        cell_pols.append(cell_pol)
+    return cell_pols
+
 def dispersion_integral(dataset_name):
     dataset = Dataset(APPS_ROOT + '/' + dataset_name, 'r')
     dsout = Dataset(APPS_ROOT + '/' + 'int_' + dataset_name,
@@ -468,7 +487,22 @@ def get_closest(date, level):
     else:
         return json.dumps(res[2])
 
+@app.route('/population/', methods=['POST'])
+def cdetections():
+    dsip = request.get_json(force=True)
+    multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
+    affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
+    jpols = []
+    for id in affected_ids:
+        jpols.append(dict(type='Feature', properties={"DN":0}, geometry=mapping(cell_pols[id]['obj'])))
+
+    end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
+    return json.dumps(end_res)
+
+
 if __name__ == '__main__':
+    print 'Loading grid cells.......'
+    cell_pols = load_gridcells()
     with open('db_info.json', 'r') as data_file:
         dbpar = json.load(data_file)
     conn = psycopg2.connect("dbname='" + dbpar['dbname'] + "' user='" + dbpar['user'] +
