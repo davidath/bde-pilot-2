@@ -597,7 +597,7 @@ function estimateLocation() {
     drawStations();
     var res = document.getElementById('source_result');
     res.innerHTML = '';
-    if (isPollChecked() && isMethodChecked() && isMetricChecked()) {
+    if (isPollChecked() && isMethodChecked()) {
           var locs = [];
           vector.getSource().forEachFeature(function(feature) {
               try {
