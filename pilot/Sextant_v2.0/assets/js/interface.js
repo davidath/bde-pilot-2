@@ -643,19 +643,6 @@ function estimateLocation() {
                     res.innerHTML = res_str;
                     loader.style.display = 'none';
                     eheader.style.display = 'block';
-                    var slider = document.getElementById('loader_ic');
-                    slider.style.display = 'block';
-                    var affected = [];
-                    for (var i=0; i<resp['dispersions'].length;i++){
-                      var popreq = new XMLHttpRequest();
-                      popreq.open("POST", listener_ip+"population/", true);
-                      popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-                      popreq.send(JSON.stringify(resp['dispersions'][i]));
-                      popreq.onloadend = function() {
-                          affected.push(popreq.responseText);
-                      }
-                    }
-                    resp.affected = affected;
                 }
               else {
                      alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
@@ -669,7 +656,24 @@ function estimateLocation() {
     } else {
         alert('You should choose a weather file, pollutant & clustering method before estimating the source\'s location');
     }
+    calc_population();
+}
 
+
+function calc_population(){
+  var slider = document.getElementById('loader_ic');
+  slider.style.display = 'block';
+  var affected = [];
+  for (var i=0; i<resp['dispersions'].length;i++){
+    var popreq = new XMLHttpRequest();
+    popreq.open("POST", listener_ip+"population/", true);
+    popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+    popreq.send(resp['dispersions'][i]);
+    popreq.onloadend = function() {
+        affected.push(popreq.responseText);
+    }
+  }
+  resp.affected = affected;
 }
 
 function drawDispersion(idx){
