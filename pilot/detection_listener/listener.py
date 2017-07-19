@@ -492,6 +492,7 @@ def population():
     resparr = request.get_json(force=True)
     affected = []
     for disp in resparr['dispersions']:
+        disp = json.loads(disp)
         multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
         affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
         affected_ids = list(set(affected_ids))
