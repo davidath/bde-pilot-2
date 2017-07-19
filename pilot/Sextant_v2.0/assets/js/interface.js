@@ -643,6 +643,19 @@ function estimateLocation() {
                     res.innerHTML = res_str;
                     loader.style.display = 'none';
                     eheader.style.display = 'block';
+                    var slider = document.getElementById('loader_ic');
+                    slider.style.display = 'block';
+                    var affected = [];
+                    for (var i=0; i<resp['dispersions'].length;i++){
+                      var req = new XMLHttpRequest();
+                      req.open("POST", listener_ip+"population/", true);
+                      req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+                      req.send(JSON.stringify(resp['dispersions'][i]));
+                      req.onloadend = function() {
+                          affected.push(req.responseText);
+                      }
+                    }
+                    resp.affected = affected;
                 }
               else {
                      alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
