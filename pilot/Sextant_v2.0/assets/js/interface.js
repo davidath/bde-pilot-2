@@ -615,8 +615,10 @@ function estimateLocation() {
           if (locs.length > 0) {
               var loader = document.getElementById('loader_ic');
               var eheader = document.getElementById('estimate');
+              var slider = document.getElementById('slider');
               loader.style.display = 'block';
               eheader.style.display = 'none';
+              slider.style.display = 'none';
               if (methodcheckedVal().indexOf('classification') == -1)
               {
                 var req = new XMLHttpRequest();
@@ -643,14 +645,13 @@ function estimateLocation() {
                     res.innerHTML = res_str;
                     loader.style.display = 'none';
                     eheader.style.display = 'block';
-                    var slider = document.getElementById('slider');
-                    slider.style.display = 'block';
                     var popreq = new XMLHttpRequest();
                     popreq.open("POST", listener_ip+"population/", true);
                     popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
                     popreq.send(JSON.stringify(resp));
                     popreq.onloadend = function() {
                          resp = JSON.parse(popreq.responseText);
+                         slider.style.display = 'block';
                     }
                 }
               else {
@@ -724,26 +725,25 @@ function drawDispersion(idx){
 
      mapFilter.addLayer(layer);
 
-     var listenerKey = layer.getSource().on('change', function(e) {
-         if (layer.getSource().getState() == 'ready') {
-             updateLayerStats(label);
-
-             for (var i = 0; i < mapLayers.length; i++) {
-                 if ((mapLayers[i].name === label) && (label != 'userInfo')) {
-                     mapLayers[i].features = getLayerFeatureNames(layer);
-                     break;
-                 }
-             }
-             var zoomOn = 0;
-             vector.getSource().forEachFeature(function(feature) { zoomOn = feature.getGeometry().getCoordinates(); });
-
-             map.getView().centerOn(zoomOn,map.getSize(), [570, 500])
-
-             //Unregister the "change" listener
-             layer.getSource().unByKey(listenerKey);
+     affected = resp["affected"][idx];
+     var max;
+     for (var i=0;i<affected['features'];i++){
+         if (!max || parseInt() > max)
+         {
+           max = parseInt(affected['features'][i]['properties']['POP']);
          }
-     });
-
+     }
+     var min;
+     for (var i=0;i<affected['features'];i++){
+         if (!min || parseInt() < min)
+         {
+           min = parseInt(affected['features'][i]['properties']['POP']);
+         }
+     }
+     var slider = document.getElementById('slider');
+     slider.min = min;
+     slider.max = max;
+     
 }
 
 

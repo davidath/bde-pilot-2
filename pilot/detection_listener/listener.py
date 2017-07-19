@@ -22,6 +22,8 @@ from sklearn.preprocessing import maxabs_scale, scale, minmax_scale
 from scipy.ndimage.filters import gaussian_filter
 import scipy.misc
 from shapely.geometry import shape, Point, Polygon, mapping, MultiPolygon
+import random
+
 
 BOOTSTRAP_SERVE_LOCAL = True
 app = Flask(__name__)
@@ -496,10 +498,12 @@ def population():
         multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
         affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
         affected_ids = list(set(affected_ids))
-        # population_tag = range(len(affected_ids))
+        population_tag = []
+        for id in affected_ids:
+            population_tag.append(random.randomint(0,10000))
         jpols = []
         for id in affected_ids:
-            jpols.append(dict(type='Feature', properties={"POP":unicode(1000)}, geometry=mapping(cell_pols[id]['obj'])))
+            jpols.append(dict(type='Feature', properties={"POP":unicode(population_tag[id])}, geometry=mapping(cell_pols[id]['obj'])))
         end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
         affected.append(end_res)
     resparr['affected'] = affected

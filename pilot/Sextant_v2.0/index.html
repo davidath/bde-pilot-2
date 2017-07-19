@@ -2452,6 +2452,7 @@
 		      	  	  <div class="col-md-11 col-sm-11">
 		      	  	      <a onClick="estimateLocation()"><h4 id="estimate">Estimate source location</h4></a><div id="loader_ic" class="loader" style="display:none;"></div></a>
                       <input id='slider' type="range" min="10" max="1000" step="10" value="300" style="display:none;">
+                      <h4 id="thres" style="display:none;">Population threshold</h4>
                       <br><h4 id="source_result"></h4> <img src="" id="plantimg" height="150" width="300" style="display:none;">
 		      	  	  </div>
 		      	  </div>
@@ -2548,7 +2549,23 @@
   <script type="text/javascript" src="./assets/js/rangeslider.min.js"></script>
   <link href="./assets/css/rangeslider.css" rel="stylesheet">
   <script>
-      $('input[type="range"]').rangeslider();
+      var $element = $('input[type="range"]');
+      var $output = document.getElementById('slider')
+
+      function updateOutput(el, val) {
+      el.innerHTML = 'Population threshold: '+val;
+      }
+
+      $element
+      .rangeslider({
+      polyfill: false,
+      onInit: function() {
+        updateOutput($output, this.value);
+      }
+      })
+      .on('input', function() {
+      updateOutput($output, this.value);
+      });
   </script>
 
   <script type="text/javascript">
