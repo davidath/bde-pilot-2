@@ -502,8 +502,8 @@ def population():
         for id in affected_ids:
             population_tag.append(random.randint(0,10000))
         jpols = []
-        for id in affected_ids:
-            jpols.append(dict(type='Feature', properties={"POP":unicode(population_tag[id])}, geometry=mapping(cell_pols[id]['obj'])))
+        for p,id in enumerate(affected_ids):
+            jpols.append(dict(type='Feature', properties={"POP":unicode(population_tag[p])}, geometry=mapping(cell_pols[id]['obj'])))
         end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
         affected.append(end_res)
     resparr['affected'] = affected

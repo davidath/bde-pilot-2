@@ -615,7 +615,7 @@ function estimateLocation() {
           if (locs.length > 0) {
               var loader = document.getElementById('loader_ic');
               var eheader = document.getElementById('estimate');
-              var slider = document.getElementById('slider');
+              var slider = document.getElementById('p_slider');
               var thres = document.getElementById('thres');
               loader.style.display = 'block';
               eheader.style.display = 'none';
@@ -742,7 +742,7 @@ function drawDispersion(idx){
            min = parseInt(affected['features'][i]['properties']['POP']);
          }
      }
-     var slider = document.getElementById('slider');
+     var slider = document.getElementById('p_slider');
      slider.min = min;
      slider.max = max;
 
