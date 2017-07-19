@@ -616,7 +616,7 @@ function estimateLocation() {
               var loader = document.getElementById('loader_ic');
               var eheader = document.getElementById('estimate');
               var slider = document.getElementById('p_slider');
-              var thres = document.getElementById('thres');
+              var thres = document.getElementById('p_thres');
               loader.style.display = 'block';
               eheader.style.display = 'none';
               slider.style.display = 'none';
