@@ -647,12 +647,12 @@ function estimateLocation() {
                     slider.style.display = 'block';
                     var affected = [];
                     for (var i=0; i<resp['dispersions'].length;i++){
-                      var req = new XMLHttpRequest();
-                      req.open("POST", listener_ip+"population/", true);
-                      req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-                      req.send(JSON.stringify(resp['dispersions'][i]));
-                      req.onloadend = function() {
-                          affected.push(req.responseText);
+                      var popreq = new XMLHttpRequest();
+                      popreq.open("POST", listener_ip+"population/", true);
+                      popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+                      popreq.send(JSON.stringify(resp['dispersions'][i]));
+                      popreq.onloadend = function() {
+                          affected.push(popreq.responseText);
                       }
                     }
                     resp.affected = affected;
