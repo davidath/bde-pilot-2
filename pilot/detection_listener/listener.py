@@ -42,7 +42,7 @@ APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 def load_gridcells():
     with open('dispersion_grid.json') as ff:
-    cells = json.load(ff)
+         cells = json.load(ff)
 
     cell_pols = []
     for cell in cells:
