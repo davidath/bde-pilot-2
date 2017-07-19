@@ -493,7 +493,7 @@ def population():
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
     affected_ids = list(set(affected_ids))
-    population_tag = xrange(len(affected_ids))
+    population_tag = range(len(affected_ids))
     jpols = []
     for id in affected_ids:
         jpols.append(dict(type='Feature', properties={"POP":unicode(population_tag)}, geometry=mapping(cell_pols[id]['obj'])))

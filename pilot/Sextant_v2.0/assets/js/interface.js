@@ -663,9 +663,9 @@ function estimateLocation() {
 function calc_population(){
   var slider = document.getElementById('slider');
   slider.style.display = 'block';
+  var popreq = new XMLHttpRequest();
   var affected = [];
   for (var i=0; i<resp['dispersions'].length;i++){
-    var popreq = new XMLHttpRequest();
     popreq.open("POST", listener_ip+"population/", true);
     popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
     popreq.send(resp['dispersions'][i]);
