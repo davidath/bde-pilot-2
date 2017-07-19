@@ -659,19 +659,22 @@ function estimateLocation() {
     }
 }
 
+function call_population(str){
+  var popreq = new XMLHttpRequest();
+  popreq.open("POST", listener_ip+"population/", true);
+  popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+  popreq.send(str);
+  popreq.onloadend = function() {
+      return popreq.responseText;
+  }
+}
 
 function calc_population(){
   var slider = document.getElementById('slider');
   slider.style.display = 'block';
-  var popreq = new XMLHttpRequest();
   var affected = [];
   for (var i=0; i<resp['dispersions'].length;i++){
-    popreq.open("POST", listener_ip+"population/", true);
-    popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-    popreq.send(resp['dispersions'][i]);
-    popreq.onloadend = function() {
-        affected.push(popreq.responseText);
-    }
+      affected.push(call_population(resp['dispersions'][i]));
   }
   resp.affected = affected;
 }
