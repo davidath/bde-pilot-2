@@ -643,12 +643,12 @@ function estimateLocation() {
                     res.innerHTML = res_str;
                     loader.style.display = 'none';
                     eheader.style.display = 'block';
+                    calc_population();
                 }
               else {
                      alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
                      loader.style.display = 'none';
                      eheader.style.display = 'block';
-                     calc_population();
                   }
               };
       }else {
