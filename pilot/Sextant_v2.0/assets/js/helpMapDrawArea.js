@@ -206,7 +206,7 @@ function getBaseMapType() {
 
 function clearDispersion(){
   mapFilter.getLayers().forEach(function(layer) {
-      if (layer.get('title') == 'dispersion') {
+      if (layer.get('title').indexOf('dispersion') !== -1) {
           mapFilter.removeLayer(layer);
       }
   });

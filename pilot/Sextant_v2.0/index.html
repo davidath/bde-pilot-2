@@ -30,6 +30,12 @@
     <link href="./assets/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="./assets/css/bootstrap-datetimepicker.css" rel="stylesheet">
 
+    <!-- Slider -->
+    <script src="jquery.min.js"></script>
+    <script src="rangeslider.min.js"></script>
+    <link href="./assets/css/rangeslider.css" rel="stylesheet">
+
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="./assets/font-awesome-4.3.0/css/font-awesome.min.css">
 
@@ -2450,6 +2456,7 @@
 		              <div class="row" style="margin-right:5px">
 		      	  	  <div class="col-md-11 col-sm-11">
 		      	  	      <a onClick="estimateLocation()"><h4 id="estimate">Estimate source location</h4></a><div id="loader_ic" class="loader" style="display:none;"></div></a>
+                      <input type="range" min="10" max="1000" step="10" value="300" data-orientation="vertical">
                       <br><h4 id="source_result"></h4> <img src="" id="plantimg" height="150" width="300" style="display:none;">
 		      	  	  </div>
 		      	  </div>

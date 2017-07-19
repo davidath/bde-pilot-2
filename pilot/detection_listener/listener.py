@@ -487,15 +487,17 @@ def get_closest(date, level):
     else:
         return json.dumps(res[2])
 
-@app.route('/population/', methods=['POST'])
-def population():
-    dsip = request.get_json(force=True)
+@app.route('/population/<threshold>', methods=['POST'])
+def population(threshold):
+    disp = request.get_json(force=True)
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
+    affected_ids = list(set(affected_ids))
+    population_tag = xrange(len(affected_ids))
     jpols = []
     for id in affected_ids:
-        jpols.append(dict(type='Feature', properties={"DN":0}, geometry=mapping(cell_pols[id]['obj'])))
-
+        if population_tag[id] >= threshold:
+            jpols.append(dict(type='Feature', properties={"DN":0}, geometry=mapping(cell_pols[id]['obj'])))
     end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
     return json.dumps(end_res)
 

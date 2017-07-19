@@ -661,7 +661,7 @@ function estimateLocation() {
 
 function drawDispersion(idx){
      var styling = null;
-     var label = 'dispersion';
+     var label = 'dispersion_'+idx;
      clearDispersion();
      vector.getSource().forEachFeature(function(feature) {
      var s = document.getElementById('stat_info');
