@@ -620,7 +620,7 @@ function estimateLocation() {
               if (methodcheckedVal().indexOf('classification') == -1)
               {
                 var req = new XMLHttpRequest();
-                req.open("POST", listener_ip+"detections/" + timestamp + "/" + pollcheckedVal() + "/" + metriccheckedVal() + "/" + methodcheckedVal(), true);
+                req.open("POST", listener_ip+"detections/" + timestamp + "/" + pollcheckedVal() + "/" + metriccheckedVal() + "/cosine", true);
                 req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
                 req.send(JSON.stringify(locs));
               }
