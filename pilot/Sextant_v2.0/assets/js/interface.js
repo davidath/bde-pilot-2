@@ -643,7 +643,15 @@ function estimateLocation() {
                     res.innerHTML = res_str;
                     loader.style.display = 'none';
                     eheader.style.display = 'block';
-                    calc_population();
+                    var slider = document.getElementById('slider');
+                    slider.style.display = 'block';
+                    var popreq = new XMLHttpRequest();
+                    popreq.open("POST", listener_ip+"population/", true);
+                    popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+                    popreq.send(JSON.stringify(resp));
+                    popreq.onloadend = function() {
+                         resp = JSON.parse(popreq.responseText);
+                    }
                 }
               else {
                      alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
@@ -659,25 +667,7 @@ function estimateLocation() {
     }
 }
 
-function call_population(str){
-  var popreq = new XMLHttpRequest();
-  popreq.open("POST", listener_ip+"population/", true);
-  popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-  popreq.send(str);
-  popreq.onloadend = function() {
-      return popreq.responseText;
-  }
-}
 
-function calc_population(){
-  var slider = document.getElementById('slider');
-  slider.style.display = 'block';
-  var affected = [];
-  for (var i=0; i<resp['dispersions'].length;i++){
-      affected.push(call_population(resp['dispersions'][i]));
-  }
-  resp.affected = affected;
-}
 
 function drawDispersion(idx){
      var styling = null;

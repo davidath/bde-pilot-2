@@ -489,16 +489,20 @@ def get_closest(date, level):
 
 @app.route('/population/', methods=['POST'])
 def population():
-    disp = request.get_json(force=True)
-    multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
-    affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
-    affected_ids = list(set(affected_ids))
-    # population_tag = range(len(affected_ids))
-    jpols = []
-    for id in affected_ids:
-        jpols.append(dict(type='Feature', properties={"POP":unicode(1000)}, geometry=mapping(cell_pols[id]['obj'])))
-    end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
-    return json.dumps(end_res)
+    resparr = request.get_json(force=True)
+    affected = []
+    for disp in resparr['dispersions']:
+        multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
+        affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
+        affected_ids = list(set(affected_ids))
+        # population_tag = range(len(affected_ids))
+        jpols = []
+        for id in affected_ids:
+            jpols.append(dict(type='Feature', properties={"POP":unicode(1000)}, geometry=mapping(cell_pols[id]['obj'])))
+        end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
+        affected.append(end_res)
+    resparr['affected'] = affected
+    return json.dumps(resparr)
 
 if __name__ == '__main__':
     print 'Loading grid cells.......'
