@@ -487,7 +487,7 @@ def get_closest(date, level):
         return json.dumps(res[2])
 
 @app.route('/population/', methods=['POST'])
-def cdetections():
+def population():
     dsip = request.get_json(force=True)
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
