@@ -2564,14 +2564,14 @@
       .rangeslider({
       polyfill: false,
       onInit: function() {
-        updateOutput($output, this.value);
+        // updateOutput($output, this.value);
       },
       onSlide:function(){
         updateOutput($output, this.value);
       }
       })
       .on('input', function() {
-      updateOutput($output, this.value);
+      // updateOutput($output, this.value);
       });
   </script>
 
