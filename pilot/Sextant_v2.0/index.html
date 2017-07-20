@@ -2556,7 +2556,8 @@
       var $output = document.getElementById('p_thres');
 
       function updateOutput(el, val) {
-      el.innerHTML = 'Population threshold: '+val;
+        el.innerHTML = 'Population threshold: '+val;
+        drawPopGrid(getDrawnDispersionId(),val);
       }
 
       $element

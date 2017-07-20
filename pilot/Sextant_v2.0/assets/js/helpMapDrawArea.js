@@ -216,9 +216,32 @@ function clearDispersion(){
   });
 }
 
+function getDrawnDispersionId(){
+  var id;
+  mapFilter.getLayers().forEach(function(layer) {
+    try{
+        if (layer.get('title').indexOf('dispersion') !== -1) {
+            var tokens = layer.get('title').split("_");
+            id = parseInt(tokens[1]);
+        }
+      } catch(e) {
+        // pass
+      }
+  });
+  return id;
+}
+
 function clearWindDir(){
   mapFilter.getLayers().forEach(function(layer) {
       if (layer.get('title') == 'wind_direction') {
+          mapFilter.removeLayer(layer);
+      }
+  });
+}
+
+function clearPopGrid(){
+  mapFilter.getLayers().forEach(function(layer) {
+      if (layer.get('title') == 'pop_grid') {
           mapFilter.removeLayer(layer);
       }
   });

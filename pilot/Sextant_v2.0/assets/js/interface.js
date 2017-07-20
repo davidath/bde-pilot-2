@@ -585,89 +585,87 @@ function estimateLocation() {
     var date = $('#datepicker').datepicker().val();
     var hourdiv = document.getElementById("hourpicker");
     var hour = hourdiv.options[hourdiv.selectedIndex].value;
-    var timestamp = date+" "+hour+":00:00";
+    var timestamp = date + " " + hour + ":00:00";
     clearDispersion();
     vector.getSource().forEachFeature(function(feature) {
-    var s = document.getElementById('stat_info');
-      for(i=0; i<s.childNodes.length; i++) {
-        if (s.childNodes[i].id == feature.getId())
-        {vector.getSource().removeFeature(feature);}
-      }
+        var s = document.getElementById('stat_info');
+        for (i = 0; i < s.childNodes.length; i++) {
+            if (s.childNodes[i].id == feature.getId()) {
+                vector.getSource().removeFeature(feature);
+            }
+        }
     });
     drawStations();
     var res = document.getElementById('source_result');
     res.innerHTML = '';
     if (isPollChecked() && isMethodChecked()) {
-          var locs = [];
-          vector.getSource().forEachFeature(function(feature) {
-              try {
-                  var id = feature.getId();
-                  if (id.includes('detection')) {
-                      var coord = ol.proj.transform(feature.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
-                      locs.push({
-                          lat: String(coord[1]),
-                          lon: String(coord[0])
-                      });
-                  }
-              } catch (e) { //do nothing
-              }
-          });
-          if (locs.length > 0) {
-              var loader = document.getElementById('loader_ic');
-              var eheader = document.getElementById('estimate');
-              var slider = document.getElementById('div_slider');
-              var thres = document.getElementById('p_thres');
-              loader.style.display = 'block';
-              eheader.style.display = 'none';
-              slider.style.display = 'none';
-              thres.style.display = 'none';
-              if (methodcheckedVal().indexOf('classification') == -1)
-              {
-                var req = new XMLHttpRequest();
-                req.open("POST", listener_ip+"detections/" + timestamp + "/" + pollcheckedVal() + "/cosine/" + methodcheckedVal(), true);
-                req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-                req.send(JSON.stringify(locs));
-              }
-              else {
-                var req = new XMLHttpRequest();
-                req.open("POST", listener_ip+"class_detections/" + timestamp + "/" + pollcheckedVal() + "/cosine/" + methodcheckedVal(), true);
-                req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-                req.send(JSON.stringify(locs));
-              }
-              req.onloadend = function() {
-                  resp = JSON.parse(req.responseText);
-              if (resp["scores"][0]-resp["scores"][2] !=0) {
-                    res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th></tr>';
-                    for (var i=0; i<resp['scores'].length;i++){
-                        if (resp['scores'][i] != 0) {
-                          res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion('+i+')">'+resp['stations'][i]+'</a></td><td style="padding: 8px;">'+ resp['scores'][i] +'</td></tr>';
-                        }
-                    }
-                    res_str += '</table>';
-                    res.innerHTML = res_str;
-                    loader.style.display = 'none';
-                    eheader.style.display = 'block';
-                    $.ajax({
-                      type: 'POST',
-                      url: listener_ip+"population/",
-                      data: JSON.stringify(resp),
-                      success: function(result) {
-                             resp = JSON.parse(result);
-                             slider.style.display = 'block';
-                             thres.style.display = 'block'
-                      },
-                      async: false
+        var locs = [];
+        vector.getSource().forEachFeature(function(feature) {
+            try {
+                var id = feature.getId();
+                if (id.includes('detection')) {
+                    var coord = ol.proj.transform(feature.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
+                    locs.push({
+                        lat: String(coord[1]),
+                        lon: String(coord[0])
                     });
                 }
-              else {
-                     alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
-                     loader.style.display = 'none';
-                     eheader.style.display = 'block';
-                  }
-              };
-      }else {
-          alert('You should mark some detection points before estimating the source\'s location');
-      }
+            } catch (e) { //do nothing
+            }
+        });
+        if (locs.length > 0) {
+            var loader = document.getElementById('loader_ic');
+            var eheader = document.getElementById('estimate');
+            var slider = document.getElementById('div_slider');
+            var thres = document.getElementById('p_thres');
+            loader.style.display = 'block';
+            eheader.style.display = 'none';
+            slider.style.display = 'none';
+            thres.style.display = 'none';
+            if (methodcheckedVal().indexOf('classification') == -1) {
+                var req = new XMLHttpRequest();
+                req.open("POST", listener_ip + "detections/" + timestamp + "/" + pollcheckedVal() + "/cosine/" + methodcheckedVal(), true);
+                req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+                req.send(JSON.stringify(locs));
+            } else {
+                var req = new XMLHttpRequest();
+                req.open("POST", listener_ip + "class_detections/" + timestamp + "/" + pollcheckedVal() + "/cosine/" + methodcheckedVal(), true);
+                req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+                req.send(JSON.stringify(locs));
+            }
+            req.onloadend = function() {
+                resp = JSON.parse(req.responseText);
+                if (resp["scores"][0] - resp["scores"][2] != 0) {
+                    res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th></tr>';
+                    for (var i = 0; i < resp['scores'].length; i++) {
+                        if (resp['scores'][i] != 0) {
+                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td></tr>';
+                        }
+                    }
+                    $.ajax({
+                        type: 'POST',
+                        url: listener_ip + "population/",
+                        data: JSON.stringify(resp),
+                        success: function(result) {
+                            resp = JSON.parse(result);
+                            slider.style.display = 'block';
+                            thres.style.display = 'block'
+                            res_str += '</table>';
+                            res.innerHTML = res_str;
+                            loader.style.display = 'none';
+                            eheader.style.display = 'block';
+                        },
+                        async: false
+                    });
+                } else {
+                    alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
+                    loader.style.display = 'none';
+                    eheader.style.display = 'block';
+                }
+            };
+        } else {
+            alert('You should mark some detection points before estimating the source\'s location');
+        }
     } else {
         alert('You should choose a weather file, pollutant & clustering method before estimating the source\'s location');
     }
@@ -675,101 +673,149 @@ function estimateLocation() {
 
 
 
-function drawDispersion(idx){
-     var styling = null;
-     var label = 'dispersion_'+idx;
-     clearDispersion();
-     vector.getSource().forEachFeature(function(feature) {
-     var s = document.getElementById('stat_info');
-       for(i=0; i<s.childNodes.length; i++) {
-         if (s.childNodes[i].id == feature.getId())
-         {    var style = new ol.style.Style({
-                       image: new ol.style.Icon({
-                           src: 'http://test.strabon.di.uoa.gr/Sextant2/assets/images/map-pin-md.png',
-                           size: [186, 297],
-                           scale: 0.1
-                       })
-                   });
-             feature.setStyle(style);}
-       }
-     });
-     vector.getSource().forEachFeature(function(feature) {
-       var fid = feature.getId();
-       if (fid == resp["stations"][idx]){
-         var style = new ol.style.Style({
-                 image: new ol.style.Icon({
-                     src: './assets/images/pin_red.png',
-                     size: [433, 692],
-                     scale: 0.05
-                 })
-             });
-         feature.setStyle(style);
-       }
-     });
-     var s = document.getElementById('stat_info');
-     for(i=0; i<s.childNodes.length; i++) {
-       s.childNodes[i].style.display = 'none';
-     }
-     var div = document.getElementById(resp["stations"][idx]);
-     div.style.display = 'block';
-     geo = JSON.parse(resp['dispersions'][idx]);
-     var features = new ol.format.GeoJSON().readFeatures(geo, {
-         featureProjection: 'EPSG:3857'
-     });
-     var source = new ol.source.Vector({
-       features: features
-     });
+function drawDispersion(idx) {
+    var styling = null;
+    var label = 'dispersion_' + idx;
+    clearDispersion();
+    vector.getSource().forEachFeature(function(feature) {
+        var s = document.getElementById('stat_info');
+        for (i = 0; i < s.childNodes.length; i++) {
+            if (s.childNodes[i].id == feature.getId()) {
+                var style = new ol.style.Style({
+                    image: new ol.style.Icon({
+                        src: 'http://test.strabon.di.uoa.gr/Sextant2/assets/images/map-pin-md.png',
+                        size: [186, 297],
+                        scale: 0.1
+                    })
+                });
+                feature.setStyle(style);
+            }
+        }
+    });
+    vector.getSource().forEachFeature(function(feature) {
+        var fid = feature.getId();
+        if (fid == resp["stations"][idx]) {
+            var style = new ol.style.Style({
+                image: new ol.style.Icon({
+                    src: './assets/images/pin_red.png',
+                    size: [433, 692],
+                    scale: 0.05
+                })
+            });
+            feature.setStyle(style);
+        }
+    });
+    var s = document.getElementById('stat_info');
+    for (i = 0; i < s.childNodes.length; i++) {
+        s.childNodes[i].style.display = 'none';
+    }
+    var div = document.getElementById(resp["stations"][idx]);
+    div.style.display = 'block';
+    geo = JSON.parse(resp['dispersions'][idx]);
+    var features = new ol.format.GeoJSON().readFeatures(geo, {
+        featureProjection: 'EPSG:3857'
+    });
+    var source = new ol.source.Vector({
+        features: features
+    });
 
-     var layer = new ol.layer.Image({
-         title: label,
-         source: new ol.source.ImageVector({
-           source: source,
-               style: defaultVectorStyle
-           })
-       });
+    var layer = new ol.layer.Image({
+        title: label,
+        source: new ol.source.ImageVector({
+            source: source,
+            style: defaultVectorStyle
+        })
+    });
 
-     mapFilter.addLayer(layer);
+    mapFilter.addLayer(layer);
 
-     affected = resp['affected'][idx];
-     var max;
-     for (var i=0;i<affected['features'].length;i++){
-         if (!max || parseInt(affected['features'][i]['properties']['POP']) > max)
-         {
-           max = parseInt(affected['features'][i]['properties']['POP']);
-         }
-     }
-     var min;
-     for (var i=0;i<affected['features'].length;i++){
-         if (!min || parseInt() < min)
-         {
-           min = parseInt(affected['features'][i]['properties']['POP']);
-         }
-     }
-     var slider = document.getElementById('p_slider');
-     slider.min = min;
-     slider.max = max;
-     $('input[type="range"]').rangeslider('update', true);
+    affected = resp['affected'][idx];
+    var max;
+    for (var i = 0; i < affected['features'].length; i++) {
+        if (!max || parseInt(affected['features'][i]['properties']['POP']) > max) {
+            max = parseInt(affected['features'][i]['properties']['POP']);
+        }
+    }
+    var min;
+    for (var i = 0; i < affected['features'].length; i++) {
+        if (!min || parseInt() < min) {
+            min = parseInt(affected['features'][i]['properties']['POP']);
+        }
+    }
+    var slider = document.getElementById('p_slider');
+    slider.min = min;
+    slider.max = max;
+    $('input[type="range"]').rangeslider('update', true);
+}
+
+
+function filterPop(idx, thres) {
+    var grid = resp.affected[idx];
+    var filtered = grid.features.filter(function(prop) {
+        return prop['properties']['POP'] >= thres;
+    });
+    var toReturn = {};
+    toReturn.crs = grid.crs;
+    toReturn.type = "FeatureCollection";
+    toReturn.features = filtered;
+    return toReturn;
+}
+
+function drawPopGrid(idx, thres) {
+    clearPopGrid();
+    var geo = filterPop(idx, thres);
+    var styling =  new ol.style.Style({
+        fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 255, 0.2)'
+        }),
+        stroke: new ol.style.Stroke({
+            color: '#c42c11',
+            width: 2
+        }),
+        image: new ol.style.Circle({
+            radius: 7,
+            fill: new ol.style.Fill({
+                color: '#c42c11'
+            })
+        })
+    });
+    var label = 'pop_grid';
+    var features = new ol.format.GeoJSON().readFeatures(geojsonObject, {
+        featureProjection: 'EPSG:3857'
+    });
+    var source = new ol.source.Vector({
+        features: features
+    });
+
+    var layer = new ol.layer.Image({
+        title: label,
+        source: new ol.source.ImageVector({
+            source: source,
+            style: styling
+        })
+    });
+    mapFilter.addLayer(layer);
+
 }
 
 
 function drawWindDir() {
-      var date = $('#datepicker').datepicker().val();
-      var hourdiv = document.getElementById("hourpicker");
-      var hour = hourdiv.options[hourdiv.selectedIndex].value;
-      var pldiv = document.getElementById("pressure_level");
-      var level = pldiv.options[pldiv.selectedIndex].value;
-      var timestamp = date+" "+hour+":00:00";
-      clearWindDir();
-      var req = new XMLHttpRequest();
-      req.open("GET", listener_ip+"getClosestWeather/"+timestamp+"/"+level, true);
-      req.setRequestHeader('Content-Type', 'plain/text; charset=utf-8');
-      req.onreadystatechange = function() {
+    var date = $('#datepicker').datepicker().val();
+    var hourdiv = document.getElementById("hourpicker");
+    var hour = hourdiv.options[hourdiv.selectedIndex].value;
+    var pldiv = document.getElementById("pressure_level");
+    var level = pldiv.options[pldiv.selectedIndex].value;
+    var timestamp = date + " " + hour + ":00:00";
+    clearWindDir();
+    var req = new XMLHttpRequest();
+    req.open("GET", listener_ip + "getClosestWeather/" + timestamp + "/" + level, true);
+    req.setRequestHeader('Content-Type', 'plain/text; charset=utf-8');
+    req.onreadystatechange = function() {
         if (req.readyState == XMLHttpRequest.DONE) {
             geobj = JSON.parse(req.responseText);
             if (geobj.hasOwnProperty('error')) {
-               alert('date is out of bounds');
-            }
-            else{
+                alert('date is out of bounds');
+            } else {
                 var styling = new ol.style.Style({
                     stroke: new ol.style.Stroke({
                         color: [136, 136, 136, 1],
@@ -777,30 +823,30 @@ function drawWindDir() {
                     })
                 });
                 var label = 'wind_direction';
-                  var geojsonObject = {
-                        'type': 'FeatureCollection',
-                        'crs': {
-                            'type': 'name',
-                            'properties': {
-                                'name': 'EPSG:4326'
-                            }
-                        },
-                        'features': [ geobj ]
-                      };
-                      var features = new ol.format.GeoJSON().readFeatures(geojsonObject, {
-                          featureProjection: 'EPSG:3857'
-                      });
-                      var source = new ol.source.Vector({
-                        features: features
-                      });
+                var geojsonObject = {
+                    'type': 'FeatureCollection',
+                    'crs': {
+                        'type': 'name',
+                        'properties': {
+                            'name': 'EPSG:4326'
+                        }
+                    },
+                    'features': [geobj]
+                };
+                var features = new ol.format.GeoJSON().readFeatures(geojsonObject, {
+                    featureProjection: 'EPSG:3857'
+                });
+                var source = new ol.source.Vector({
+                    features: features
+                });
 
                 var layer = new ol.layer.Image({
                     title: label,
                     source: new ol.source.ImageVector({
-                      source: source,
-                          style: styling
-                      })
-                  });
+                        source: source,
+                        style: styling
+                    })
+                });
                 mapFilter.addLayer(layer);
                 var listenerKey = layer.getSource().on('change', function(e) {
                     if (layer.getSource().getState() == 'ready') {
@@ -819,8 +865,8 @@ function drawWindDir() {
                         layer.getSource().unByKey(listenerKey);
                     }
                 });
-              }
-          }
+            }
         }
-        req.send();
+    }
+    req.send();
 }
