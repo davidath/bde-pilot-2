@@ -646,16 +646,17 @@ function estimateLocation() {
                     res.innerHTML = res_str;
                     loader.style.display = 'none';
                     eheader.style.display = 'block';
-                    var popreq = new XMLHttpRequest();
-                    popreq.open("POST", listener_ip+"population/", true);
-                    popreq.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-                    popreq.send(JSON.stringify(resp));
-                    popreq.onloadend = function() {
-                         resp = JSON.parse(popreq.responseText);
-                         callback(resp);
-                         slider.style.display = 'block';
-                         thres.style.display = 'block';
-                    }
+                    $.ajax({
+                      type: 'POST',
+                      url: listener_ip+"population/",
+                      data: JSON.stringify(resp),
+                      success: function(result) {
+                             resp = JSON.parse(result);
+                             slider.style.display = 'block';
+                             thres.style.display = 'block'
+                      },
+                      async: false
+                    });
                 }
               else {
                      alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
