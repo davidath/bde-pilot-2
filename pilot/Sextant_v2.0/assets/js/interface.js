@@ -620,6 +620,7 @@ function estimateLocation() {
               loader.style.display = 'block';
               eheader.style.display = 'none';
               slider.style.display = 'none';
+              thres.style.display = 'none';
               if (methodcheckedVal().indexOf('classification') == -1)
               {
                 var req = new XMLHttpRequest();
@@ -747,7 +748,7 @@ function drawDispersion(idx){
      var slider = document.getElementById('p_slider');
      slider.min = min;
      slider.max = max;
-
+     $('input[type="range"]').rangeslider('update', true);
 }
 
 

@@ -2565,6 +2565,9 @@
       onInit: function() {
         updateOutput($output, this.value);
       }
+      onSlide:function(){
+        updateOutput($output, this.value);
+      }
       })
       .on('input', function() {
       updateOutput($output, this.value);
