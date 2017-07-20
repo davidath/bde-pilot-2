@@ -776,7 +776,7 @@ function drawPopGrid(idx, thres) {
         image: new ol.style.Circle({
             radius: 7,
             fill: new ol.style.Fill({
-                color: '#c42c11'
+                color: 'rgba(196,44,17,'+Math.round(thres/slider.max)+')'
             })
         })
     });
