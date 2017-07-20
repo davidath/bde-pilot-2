@@ -615,7 +615,7 @@ function estimateLocation() {
           if (locs.length > 0) {
               var loader = document.getElementById('loader_ic');
               var eheader = document.getElementById('estimate');
-              var slider = document.getElementById('p_slider');
+              var slider = document.getElementById('div_slider');
               var thres = document.getElementById('p_thres');
               loader.style.display = 'block';
               eheader.style.display = 'none';
@@ -652,6 +652,7 @@ function estimateLocation() {
                     popreq.send(JSON.stringify(resp));
                     popreq.onloadend = function() {
                          resp = JSON.parse(popreq.responseText);
+                         callback(resp);
                          slider.style.display = 'block';
                          thres.style.display = 'block';
                     }
@@ -727,16 +728,16 @@ function drawDispersion(idx){
 
      mapFilter.addLayer(layer);
 
-     affected = resp["affected"][idx];
+     affected = resp['affected'][idx];
      var max;
-     for (var i=0;i<affected['features'];i++){
-         if (!max || parseInt() > max)
+     for (var i=0;i<affected['features'].length;i++){
+         if (!max || parseInt(affected['features'][i]['properties']['POP']) > max)
          {
            max = parseInt(affected['features'][i]['properties']['POP']);
          }
      }
      var min;
-     for (var i=0;i<affected['features'];i++){
+     for (var i=0;i<affected['features'].length;i++){
          if (!min || parseInt() < min)
          {
            min = parseInt(affected['features'][i]['properties']['POP']);
