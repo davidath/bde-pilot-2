@@ -763,7 +763,7 @@ function filterPop(idx, thres) {
 
 function drawPopGrid(idx, thres) {
     clearPopGrid();
-    var geo = filterPop(idx, thres);
+    var geojsonObject = filterPop(idx, thres);
     var styling =  new ol.style.Style({
         fill: new ol.style.Fill({
             color: 'rgba(255, 255, 255, 0.2)'
