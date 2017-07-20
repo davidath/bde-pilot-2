@@ -763,13 +763,14 @@ function filterPop(idx, thres) {
 
 function drawPopGrid(idx, thres) {
     clearPopGrid();
+    var slider = document.getElementById('p_slider');
     var geojsonObject = filterPop(idx, thres);
     var styling =  new ol.style.Style({
         fill: new ol.style.Fill({
             color: 'rgba(255, 255, 255, 0.2)'
         }),
         stroke: new ol.style.Stroke({
-            color: '#c42c11',
+            color: 'rgba(196,44,17,'+Math.round(thres/slider.max)+')',
             width: 2
         }),
         image: new ol.style.Circle({
