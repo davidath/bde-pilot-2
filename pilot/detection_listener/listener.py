@@ -61,22 +61,6 @@ def load_gridcells():
         cell_pols.append(cell_pol)
     return cell_pols
 
-def javascript_scale(dat, out_range=(-1, 1)):
-    domain = [np.min(dat, axis=0), np.max(dat, axis=0)]
-
-    def interp(x):
-        return out_range[0] * (1.0 - x) + out_range[1] * x
-
-    def uninterp(x):
-        b = 0
-        if (domain[1] - domain[0]) != 0:
-            b = domain[1] - domain[0]
-        else:
-            b =  1.0 / domain[1]
-        return (x - domain[0]) / b
-
-    return interp(uninterp(dat))
-
 from SPARQLWrapper import SPARQLWrapper, JSON
 
 def query(endpoint, cell_id):
@@ -551,7 +535,6 @@ def population():
                 geoname = [res['geoname']['value'] for res in results['results']['bindings']]
                 mp = {}
                 mp['population'] = population
-                mp['js'] = javascript_scale(np.array(population),(0.04,0.09))
                 mp['geoname'] = geoname
                 mp['points'] = points
                 multi_points.append(mp)
@@ -560,7 +543,7 @@ def population():
         jpols = []
         for p,point in enumerate(multi_points):
             for c,i in enumerate(point['points']):
-                jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c]),"FACTOR":unicode(point['js'][c])}, geometry=mapping(point['points'][c])))
+                jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c])}, geometry=mapping(point['points'][c])))
         end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
         affected.append(end_res)
     resparr['affected'] = affected
