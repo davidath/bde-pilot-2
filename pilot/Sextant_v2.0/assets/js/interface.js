@@ -638,17 +638,17 @@ function estimateLocation() {
             req.onloadend = function() {
                 resp = JSON.parse(req.responseText);
                 if (resp["scores"][0] - resp["scores"][2] != 0) {
-                    res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;"></th></tr>';
+                    res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;"></th></tr>';
                     for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                            resp.affected = [{},{},{}];
                             res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a onClick="getPopulation(' + i + ')">Draw population</td></tr>';
-                            res_str += '</table>';
-                            res.innerHTML = res_str;
-                            loader.style.display = 'none';
-                            eheader.style.display = 'block';
-                        }
-                    }
+                            }
+                          }
+                    res_str += '</table>';
+                    res.innerHTML = res_str;
+                    resp.affected = [{},{},{}];
+                    loader.style.display = 'none';
+                    eheader.style.display = 'block';
                 } else {
                     alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
                     loader.style.display = 'none';
@@ -670,7 +670,7 @@ function getPopulation(idx){
       url: listener_ip + "population/",
       data: JSON.stringify(resp.dispersions[idx]),
       success: function(result) {
-          pop_result = JSON.parse(result);
+          var pop_result = JSON.parse(result);
           resp.affected[idx] = pop_result;
           slider.style.display = 'block';
           thres.style.display = 'block'
