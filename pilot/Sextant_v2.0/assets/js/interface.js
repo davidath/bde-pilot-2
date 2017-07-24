@@ -665,7 +665,7 @@ function estimateLocation() {
 
 
 function getPopulation(idx){
-  var slider = document.getElementById('p_slider');
+  var slider = document.getElementById('div_slider');
   var thres = document.getElementById('p_thres');
   if (JSON.stringify(resp.affected[1]) === JSON.stringify({})) {
         $.ajax({
@@ -681,6 +681,23 @@ function getPopulation(idx){
             async: false
         });
     }
+    affected = resp['affected'][idx];
+    var max;
+    for (var i = 0; i < affected['features'].length; i++) {
+        if (!max || parseInt(affected['features'][i]['properties']['POP']) > max) {
+            max = parseInt(affected['features'][i]['properties']['POP']);
+        }
+    }
+    var min;
+    for (var i = 0; i < affected['features'].length; i++) {
+        if (!min || parseInt(affected['features'][i]['properties']['POP']) < min) {
+            min = parseInt(affected['features'][i]['properties']['POP']);
+        }
+    }
+    var slider = document.getElementById('p_slider');
+    slider.min = min;
+    slider.max = max;
+    $('input[type="range"]').rangeslider('update', true);
 }
 
 
@@ -756,23 +773,6 @@ function filterPop(idx, thres) {
 }
 
 function drawPopGrid(idx, thres) {
-    affected = resp['affected'][idx];
-    var max;
-    for (var i = 0; i < affected['features'].length; i++) {
-        if (!max || parseInt(affected['features'][i]['properties']['POP']) > max) {
-            max = parseInt(affected['features'][i]['properties']['POP']);
-        }
-    }
-    var min;
-    for (var i = 0; i < affected['features'].length; i++) {
-        if (!min || parseInt(affected['features'][i]['properties']['POP']) < min) {
-            min = parseInt(affected['features'][i]['properties']['POP']);
-        }
-    }
-    var slider = document.getElementById('p_slider');
-    slider.min = min;
-    slider.max = max;
-    $('input[type="range"]').rangeslider('update', true);
     clearPopGrid();
     var slider = document.getElementById('p_slider');
     var geojsonObject = filterPop(idx, thres);
