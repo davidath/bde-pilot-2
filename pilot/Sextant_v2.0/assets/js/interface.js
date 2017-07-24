@@ -581,89 +581,86 @@ function metriccheckedVal() {
 var geo = undefined;
 var resp = undefined;
 
-
 function estimateLocation() {
     var date = $('#datepicker').datepicker().val();
     var hourdiv = document.getElementById("hourpicker");
     var hour = hourdiv.options[hourdiv.selectedIndex].value;
-    var timestamp = date+" "+hour+":00:00";
+    var timestamp = date + " " + hour + ":00:00";
     clearDispersion();
     vector.getSource().forEachFeature(function(feature) {
-    var s = document.getElementById('stat_info');
-      for(i=0; i<s.childNodes.length; i++) {
-        if (s.childNodes[i].id == feature.getId())
-        {vector.getSource().removeFeature(feature);}
-      }
+        var s = document.getElementById('stat_info');
+        for (i = 0; i < s.childNodes.length; i++) {
+            if (s.childNodes[i].id == feature.getId()) {
+                vector.getSource().removeFeature(feature);
+            }
+        }
     });
     drawStations();
     var res = document.getElementById('source_result');
     res.innerHTML = '';
-    if (isPollChecked() && isMethodChecked() && isMetricChecked()) {
-          var locs = [];
-          vector.getSource().forEachFeature(function(feature) {
-              try {
-                  var id = feature.getId();
-                  if (id.includes('detection')) {
-                      var coord = ol.proj.transform(feature.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
-                      locs.push({
-                          lat: String(coord[1]),
-                          lon: String(coord[0])
-                      });
-                  }
-              } catch (e) { //do nothing
-              }
-          });
-          if (locs.length > 0) {
-              var loader = document.getElementById('loader_ic');
-              var eheader = document.getElementById('estimate');
-              var slider = document.getElementById('div_slider');
-              var thres = document.getElementById('p_thres');
-              var uri = document.getElementById('city_uri');
-              loader.style.display = 'block';
-              eheader.style.display = 'none';
-              slider.style.display = 'none';
-              thres.style.display = 'none';
-              uri.style.display = 'none';
-              if (methodcheckedVal().indexOf('classification') == -1)
-              {
+    if (isPollChecked() && isMethodChecked()) {
+        var locs = [];
+        vector.getSource().forEachFeature(function(feature) {
+            try {
+                var id = feature.getId();
+                if (id.includes('detection')) {
+                    var coord = ol.proj.transform(feature.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
+                    locs.push({
+                        lat: String(coord[1]),
+                        lon: String(coord[0])
+                    });
+                }
+            } catch (e) { //do nothing
+            }
+        });
+        if (locs.length > 0) {
+            var loader = document.getElementById('loader_ic');
+            var eheader = document.getElementById('estimate');
+            var slider = document.getElementById('div_slider');
+            var thres = document.getElementById('p_thres');
+            var uri = document.getElementById('city_uri');
+            loader.style.display = 'block';
+            eheader.style.display = 'none';
+            slider.style.display = 'none';
+            thres.style.display = 'none';
+            uri.style.display = 'none';
+            if (methodcheckedVal().indexOf('classification') == -1) {
                 var req = new XMLHttpRequest();
-                req.open("POST", listener_ip+"detections/" + timestamp + "/" + pollcheckedVal() + "/" + metriccheckedVal() + "/cosine", true);
+                req.open("POST", listener_ip + "detections/" + timestamp + "/" + pollcheckedVal() + "/cosine/" + methodcheckedVal(), true);
                 req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
                 req.send(JSON.stringify(locs));
-              }
-              else {
+            } else {
                 var req = new XMLHttpRequest();
-                req.open("POST", listener_ip+"class_detections/" + timestamp + "/" + pollcheckedVal() + "/" + metriccheckedVal() + "/" + methodcheckedVal(), true);
+                req.open("POST", listener_ip + "class_detections/" + timestamp + "/" + pollcheckedVal() + "/cosine/" + methodcheckedVal(), true);
                 req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
                 req.send(JSON.stringify(locs));
-              }
-              req.onloadend = function() {
-                  resp = JSON.parse(req.responseText);
-              if (resp["scores"][0]-resp["scores"][2] !=0  && metriccheckedVal() == 'cosine') {
-                    res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th></tr>';
-                    for (var i=0; i<resp['scores'].length;i++){
+            }
+            req.onloadend = function() {
+                resp = JSON.parse(req.responseText);
+                if (resp["scores"][0] - resp["scores"][2] != 0) {
+                    res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;"></th></tr>';
+                    for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                          res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion('+i+')">'+resp['stations'][i]+'</a></td><td style="padding: 8px;">'+ resp['scores'][i] +'</td></tr>';
+                            resp.affected = [{},{},{}];
+                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a onClick="getPopulation(' + i + ')">Draw population</td></tr>';
+                            res_str += '</table>';
+                            res.innerHTML = res_str;
+                            loader.style.display = 'none';
+                            eheader.style.display = 'block';
                         }
                     }
-                    res_str += '</table>';
-                    res.innerHTML = res_str;
+                } else {
+                    alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
                     loader.style.display = 'none';
                     eheader.style.display = 'block';
                 }
-              else {
-                     alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
-                     loader.style.display = 'none';
-                     eheader.style.display = 'block';
-                  }
-              };
-      }else {
-          alert('You should mark some detection points before estimating the source\'s location');
-      }
+            };
+        } else {
+            alert('You should mark some detection points before estimating the source\'s location');
+        }
     } else {
         alert('You should choose a weather file, pollutant & clustering method before estimating the source\'s location');
     }
-
 }
 
 
