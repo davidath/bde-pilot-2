@@ -544,7 +544,7 @@ def population():
         jpols = []
         for p,point in enumerate(multi_points):
             for c,i in enumerate(point['points']):
-                jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['uri'][c])}, geometry=mapping(point['points'][c])))
+                jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c])}, geometry=mapping(point['points'][c])))
         end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
         affected.append(end_res)
     resparr['affected'] = affected

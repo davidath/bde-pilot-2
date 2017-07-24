@@ -775,7 +775,7 @@ function drawPopGrid(idx, thres) {
                   image: new ol.style.Icon({
                       src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Biohazard_symbol_%28red%29.svg/520px-Biohazard_symbol_%28red%29.svg.png',
                       size: [520, 520],
-                      scale: 0.05
+                      scale: 0.01
                   })
               });
         feat.set('uri',geojsonObject.features[i].properties['URI']);
