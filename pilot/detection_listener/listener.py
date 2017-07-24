@@ -43,6 +43,11 @@ dpass = getpass.getpass()
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
+def timing(start, end):
+    hours, rem = divmod(end - start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+
 def load_gridcells():
     with open('dispersion_grid.json') as ff:
          cells = json.load(ff)
@@ -520,6 +525,7 @@ def get_closest(date, level):
 def population():
     resparr = request.get_json(force=True)
     affected = []
+    start = time.time()
     for disp in resparr['dispersions']:
         disp = json.loads(disp)
         multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
@@ -546,6 +552,8 @@ def population():
                 jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c])}, geometry=mapping(point['points'][c])))
         end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
         affected.append(end_res)
+        timing(start,time.time())
+        start = time.time()
     resparr['affected'] = affected
     return json.dumps(resparr)
 
