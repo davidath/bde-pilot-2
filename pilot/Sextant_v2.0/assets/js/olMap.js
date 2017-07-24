@@ -948,36 +948,42 @@ function drawStations(){
   req.send();
 }
 
-
-
-
-
-var select = new ol.interaction.Select({
-    condition: ol.events.condition.click,
-    filter: function(feature) {
-        try{
-           var id = feature.getId();
-           var s = document.getElementById('stat_info');
-             for(i=0; i<s.childNodes.length; i++) {
-               if (s.childNodes[i].id == id)
-               {return true;}
-             }
-        }
-        catch (e) { return false;}
-    }
-});
+var select;
 
 function addSelect(){
-  animateStatsPanel();
+  select = new ol.interaction.Select({
+      condition: ol.events.condition.click,
+      filter: function(feature) {
+          try{
+             var id = feature.getId();
+             if (id.indexOf('POP_') === -1) {
+               var s = document.getElementById('stat_info');
+                 for(i=0; i<s.childNodes.length; i++) {
+                   if (s.childNodes[i].id == id)
+                   {return true;}
+                 }
+             } else{
+               return true;
+             }
+          }
+          catch (e) { return false;}
+      }
+  });
   mapFilter.addInteraction(select);
   select.on('select', function(e) {
-    // alert(e.selected[0].getId());
-    var s = document.getElementById('stat_info');
-    for(i=0; i<s.childNodes.length; i++) {
-    s.childNodes[i].style.display = 'none';
+    var id = e.selected[0].getId();
+    if (id.indexOf('POP_') === -1) {
+      var s = document.getElementById('stat_info');
+      for(i=0; i<s.childNodes.length; i++) {
+      s.childNodes[i].style.display = 'none';
+      }
+      var div = document.getElementById(e.selected[0].getId());
+      div.style.display = 'block';
+    }else{
+      var div = document.getElementById('city_uri');
+      div.style.display = 'block';
+      div.innerHTML = 'URI:'+e.selected[0].get('uri');
     }
-    var div = document.getElementById(e.selected[0].getId());
-    div.style.display = 'block';
   });
 }
 

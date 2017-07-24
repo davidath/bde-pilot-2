@@ -240,9 +240,10 @@ function clearWindDir(){
 }
 
 function clearPopGrid(){
-  mapFilter.getLayers().forEach(function(layer) {
-      if (layer.get('title') == 'pop_grid') {
-          mapFilter.removeLayer(layer);
-      }
-  });
+  vector.getSource().forEachFeature(function(feature) {
+    var id = feature.getId();
+    if (id.indexOf('POP_') !== -1){
+       vector.getSource().removeFeature(feature);
+    }
+  }
 }

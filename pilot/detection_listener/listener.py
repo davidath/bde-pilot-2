@@ -530,11 +530,12 @@ def population():
         multi_points = []
         # for id in affected_ids:
         results = query('http://127.0.0.1:8585/SemaGrow/query',57932)
-        points = [Point(float(res['lon']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
+        points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
         population = [int(res['population']['value']) for res in results['results']['bindings']]
+        geoname = [int(res['geoname']['value']) for res in results['results']['bindings']]
         jpols = []
         for p,id in enumerate(points):
-            jpols.append(dict(type='Feature', properties={"POP":unicode(population[p])}, geometry=mapping(id)))
+            jpols.append(dict(type='Feature', properties={"POP":unicode(population[p]),"URI":unicode(geoname[p])}, geometry=mapping(id)))
         end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
         affected.append(end_res)
     resparr['affected'] = affected
