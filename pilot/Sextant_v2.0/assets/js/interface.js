@@ -618,10 +618,12 @@ function estimateLocation() {
             var eheader = document.getElementById('estimate');
             var slider = document.getElementById('div_slider');
             var thres = document.getElementById('p_thres');
+            var uri = document.getElementById('city_uri');
             loader.style.display = 'block';
             eheader.style.display = 'none';
             slider.style.display = 'none';
             thres.style.display = 'none';
+            uri.style.display = 'none';
             if (methodcheckedVal().indexOf('classification') == -1) {
                 var req = new XMLHttpRequest();
                 req.open("POST", listener_ip + "detections/" + timestamp + "/" + pollcheckedVal() + "/cosine/" + methodcheckedVal(), true);
@@ -773,7 +775,7 @@ function drawPopGrid(idx, thres) {
                   image: new ol.style.Icon({
                       src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Biohazard_symbol_%28red%29.svg/520px-Biohazard_symbol_%28red%29.svg.png',
                       size: [520, 520],
-                      scale: 0.1
+                      scale: 0.05
                   })
               });
         feat.set('uri',geojsonObject.features[i].properties['URI']);
