@@ -529,15 +529,18 @@ def population():
         affected_ids = [57932,57933,57934,57935]
         multi_points = []
         for id in affected_ids:
-            results = query('http://127.0.0.1:8585/SemaGrow/query',id)
-            points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
-            population = [int(res['population']['value']) for res in results['results']['bindings']]
-            geoname = [res['geoname']['value'] for res in results['results']['bindings']]
-            mp = {}
-            mp['population'] = population
-            mp['geoname'] = geoname
-            mp['points'] = points
-            multi_points.append(mp)
+            try:
+                results = query('http://127.0.0.1:8585/SemaGrow/query',id)
+                points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
+                population = [int(res['population']['value']) for res in results['results']['bindings']]
+                geoname = [res['geoname']['value'] for res in results['results']['bindings']]
+                mp = {}
+                mp['population'] = population
+                mp['geoname'] = geoname
+                mp['points'] = points
+                multi_points.append(mp)
+            except:
+                pass
         jpols = []
         for p,point in enumerate(multi_points):
             for c,i in enumerate(point['points']):
