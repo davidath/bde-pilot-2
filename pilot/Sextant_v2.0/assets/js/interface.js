@@ -740,7 +740,7 @@ function drawDispersion(idx) {
     }
     var min;
     for (var i = 0; i < affected['features'].length; i++) {
-        if (!min || parseInt() < min) {
+        if (!min || parseInt(affected['features'][i]['properties']['POP']) < min) {
             min = parseInt(affected['features'][i]['properties']['POP']);
         }
     }
