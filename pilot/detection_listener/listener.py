@@ -533,9 +533,8 @@ def population():
         points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
         population = [int(res['population']['value']) for res in results['results']['bindings']]
         jpols = []
-        for p,id in enumerate(points):
-            jpols.append(dict(type='Feature', properties={"POP":unicode(population[p])}, geometry=mapping(id)))
-        end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
+        # for p,id in enumerate(points):
+        end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=dict(type='Feature', geometry=mapping(MultiPoint(points))))
         affected.append(end_res)
     resparr['affected'] = affected
     return json.dumps(resparr)
