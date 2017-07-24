@@ -667,7 +667,7 @@ function estimateLocation() {
 function getPopulation(idx){
   var slider = document.getElementById('div_slider');
   var thres = document.getElementById('p_thres');
-  if (JSON.stringify(resp.affected[1]) === JSON.stringify({})) {
+  if (JSON.stringify(resp.affected[idx]) === JSON.stringify({})) {
         $.ajax({
             type: 'POST',
             url: listener_ip + "population/",
