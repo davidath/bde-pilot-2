@@ -526,18 +526,24 @@ def population():
         multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
         affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
         affected_ids = list(set(affected_ids))
-        population_tag = []
         multi_points = []
-        # for id in affected_ids:
-        results = query('http://127.0.0.1:8585/SemaGrow/query',57932)
-        points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
-        population = [int(res['population']['value']) for res in results['results']['bindings']]
-        geoname = [res['geoname']['value'] for res in results['results']['bindings']]
+        for id in affected_ids:
+            results = query('http://127.0.0.1:8585/SemaGrow/query',id)
+            points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
+            population = [int(res['population']['value']) for res in results['results']['bindings']]
+            geoname = [res['geoname']['value'] for res in results['results']['bindings']]
+            mp = {}
+            mp['population'] = population
+            mp['geoname'] = geoname
+            mp['points'] = points
+            multi_points.append(mp)
         jpols = []
-        for p,id in enumerate(points):
-            jpols.append(dict(type='Feature', properties={"POP":unicode(population[p]),"URI":unicode(geoname[p])}, geometry=mapping(id)))
+        for p,point in enumerate(multi_points):
+            for c,i in enumerate(point['points']):
+                jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['uri'][c])}, geometry=mapping(point['points'][c])))
         end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
         affected.append(end_res)
+        break
     resparr['affected'] = affected
     return json.dumps(resparr)
 
