@@ -526,7 +526,7 @@ def population():
         multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
         affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
         affected_ids = list(set(affected_ids))
-        affected_ids = [57932,57933,57934,57935,0,1]
+        # affected_ids = [57932,57933,57934,57935,0,1]
         multi_points = []
         for id in affected_ids:
             try:
