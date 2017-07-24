@@ -526,6 +526,7 @@ def population():
         multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
         affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
         affected_ids = list(set(affected_ids))
+        affected_ids = [57932,57933,57934,57935]
         multi_points = []
         for id in affected_ids:
             results = query('http://127.0.0.1:8585/SemaGrow/query',id)
@@ -543,7 +544,6 @@ def population():
                 jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['uri'][c])}, geometry=mapping(point['points'][c])))
         end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
         affected.append(end_res)
-        break
     resparr['affected'] = affected
     return json.dumps(resparr)
 
