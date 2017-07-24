@@ -643,6 +643,10 @@ function estimateLocation() {
                         if (resp['scores'][i] != 0) {
                             resp.affected = [{},{},{}];
                             res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a onClick="getPopulation(' + i + ')">Draw population</td></tr>';
+                            res_str += '</table>';
+                            res.innerHTML = res_str;
+                            loader.style.display = 'none';
+                            eheader.style.display = 'block';
                         }
                     }
                 } else {
@@ -670,10 +674,6 @@ function getPopulation(idx){
           resp.affected[idx] = pop_result;
           slider.style.display = 'block';
           thres.style.display = 'block'
-          res_str += '</table>';
-          res.innerHTML = res_str;
-          loader.style.display = 'none';
-          eheader.style.display = 'block';
       },
       async: false
   });
