@@ -694,6 +694,7 @@ function getPopulation(idx){
             min = parseInt(affected['features'][i]['properties']['POP']);
         }
     }
+    drawDispersion(idx);
     var slider = document.getElementById('p_slider');
     slider.min = min;
     slider.max = max;
