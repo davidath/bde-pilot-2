@@ -532,7 +532,7 @@ def population():
         results = query('http://127.0.0.1:8585/SemaGrow/query',57932)
         points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
         population = [int(res['population']['value']) for res in results['results']['bindings']]
-        geoname = [int(res['geoname']['value']) for res in results['results']['bindings']]
+        geoname = [res['geoname']['value'] for res in results['results']['bindings']]
         jpols = []
         for p,id in enumerate(points):
             jpols.append(dict(type='Feature', properties={"POP":unicode(population[p]),"URI":unicode(geoname[p])}, geometry=mapping(id)))
