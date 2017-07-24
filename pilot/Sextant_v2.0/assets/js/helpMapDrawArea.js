@@ -245,5 +245,5 @@ function clearPopGrid(){
     if (id.indexOf('POP_') !== -1){
        vector.getSource().removeFeature(feature);
     }
-  }
+  });
 }
