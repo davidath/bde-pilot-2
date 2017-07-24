@@ -668,7 +668,7 @@ function getPopulation(idx){
   $.ajax({
       type: 'POST',
       url: listener_ip + "population/",
-      data: JSON.stringify(resp.dispersion[idx]),
+      data: JSON.stringify(resp.dispersions[idx]),
       success: function(result) {
           pop_result = JSON.parse(result);
           resp.affected[idx] = pop_result;
