@@ -665,18 +665,22 @@ function estimateLocation() {
 
 
 function getPopulation(idx){
-  $.ajax({
-      type: 'POST',
-      url: listener_ip + "population/",
-      data: JSON.stringify(resp.dispersions[idx]),
-      success: function(result) {
-          var pop_result = JSON.parse(result);
-          resp.affected[idx] = pop_result;
-          slider.style.display = 'block';
-          thres.style.display = 'block'
-      },
-      async: false
-  });
+  var slider = document.getElementById('p_slider');
+  var thres = document.getElementById('p_thres');
+  if (JSON.stringify(resp.affected[1]) === JSON.stringify({})) {
+        $.ajax({
+            type: 'POST',
+            url: listener_ip + "population/",
+            data: JSON.stringify(resp.dispersions[idx]),
+            success: function(result) {
+                var pop_result = JSON.parse(result);
+                resp.affected[idx] = pop_result;
+                slider.style.display = 'block';
+                thres.style.display = 'block'
+            },
+            async: false
+        });
+    }
 }
 
 
@@ -736,6 +740,22 @@ function drawDispersion(idx) {
 
     mapFilter.addLayer(layer);
 
+}
+
+
+function filterPop(idx, thres) {
+    var grid = resp.affected[idx];
+    var filtered = grid.features.filter(function(prop) {
+        return prop['properties']['POP'] >= thres;
+    });
+    var toReturn = {};
+    toReturn.crs = grid.crs;
+    toReturn.type = "FeatureCollection";
+    toReturn.features = filtered;
+    return toReturn;
+}
+
+function drawPopGrid(idx, thres) {
     affected = resp['affected'][idx];
     var max;
     for (var i = 0; i < affected['features'].length; i++) {
@@ -753,22 +773,6 @@ function drawDispersion(idx) {
     slider.min = min;
     slider.max = max;
     $('input[type="range"]').rangeslider('update', true);
-}
-
-
-function filterPop(idx, thres) {
-    var grid = resp.affected[idx];
-    var filtered = grid.features.filter(function(prop) {
-        return prop['properties']['POP'] >= thres;
-    });
-    var toReturn = {};
-    toReturn.crs = grid.crs;
-    toReturn.type = "FeatureCollection";
-    toReturn.features = filtered;
-    return toReturn;
-}
-
-function drawPopGrid(idx, thres) {
     clearPopGrid();
     var slider = document.getElementById('p_slider');
     var geojsonObject = filterPop(idx, thres);
