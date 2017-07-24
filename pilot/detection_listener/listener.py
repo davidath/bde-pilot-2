@@ -529,8 +529,8 @@ def population():
         population_tag = []
         multi_points = []
         # for id in affected_ids:
-        results = query('http://localhost:8080/SemaGrow/query',57932)
-        points = [Point(float(res['lon']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
+        results = query('http://127.0.0.1:8585/SemaGrow/query',57932)
+        points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
         population = [int(res['population']['value']) for res in results['results']['bindings']]
         jpols = []
         for p,id in enumerate(points):
