@@ -982,7 +982,7 @@ function addSelect(){
     }else{
       var div = document.getElementById('city_uri');
       div.style.display = 'block';
-      div.innerHTML = 'URI:'+e.selected[0].get('uri');
+      div.innerHTML = 'URI: <a href='+e.selected[0].get('uri')+'>'+e.selected[0].get('uri')+'</a>';
     }
   });
 }
