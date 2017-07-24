@@ -771,7 +771,7 @@ function drawPopGrid(idx, thres) {
         lnglt = [geojsonObject.features[i].geometry.coordinates[0],geojsonObject.features[i].geometry.coordinates[1]];
         var feat = new ol.Feature(new ol.geom.Point(ol.proj.transform(lnglt, 'EPSG:4326', 'EPSG:3857')));
         feat.setId('POP_'+i);
-        var scale = Math.round(geojsonObject.features[i].properties['POP']/slider.max)*0.03+0.03;
+        var scale = Math.round(geojsonObject.features[i].properties['POP']/slider.max)*0.03+0.02;
         var style = new ol.style.Style({
                   image: new ol.style.Icon({
                       src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Ski_trail_rating_symbol-black_diamond.svg/1024px-Ski_trail_rating_symbol-black_diamond.svg.png',
