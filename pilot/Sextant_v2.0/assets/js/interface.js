@@ -765,38 +765,37 @@ function drawPopGrid(idx, thres) {
     clearPopGrid();
     var slider = document.getElementById('p_slider');
     var geojsonObject = filterPop(idx, thres);
-    var styling =  new ol.style.Style({
-        fill: new ol.style.Fill({
-            color: 'rgba(255, 255, 255, 0.2)'
-        }),
-        stroke: new ol.style.Stroke({
-            color: 'rgba(196,44,17,'+Math.round(thres/slider.max)+')',
-            width: 2
-        }),
-        image: new ol.style.Circle({
-            radius: 7,
-            fill: new ol.style.Fill({
-                color: 'rgba(196,44,17,'+Math.round(thres/slider.max)+')'
-            })
-        })
-    });
-    var label = 'pop_grid';
-    var features = new ol.format.GeoJSON().readFeatures(geojsonObject, {
-        featureProjection: 'EPSG:3857'
-    });
-    var source = new ol.source.Vector({
-        features: features
-    });
-
-    var layer = new ol.layer.Image({
-        title: label,
-        source: new ol.source.ImageVector({
-            source: source,
-            style: styling
-        })
-    });
-    mapFilter.addLayer(layer);
-
+    // var styling =  new ol.style.Style({
+    //     fill: new ol.style.Fill({
+    //         color: 'rgba(255, 255, 255, 0.2)'
+    //     }),
+    //     stroke: new ol.style.Stroke({
+    //         color: 'rgba(196,44,17,'+Math.round(thres/slider.max)+')',
+    //         width: 2
+    //     }),
+    //     image: new ol.style.Circle({
+    //         radius: 7,
+    //         fill: new ol.style.Fill({
+    //             color: 'rgba(196,44,17,'+Math.round(thres/slider.max)+')'
+    //         })
+    //     })
+    // });
+    // var label = 'pop_grid';
+    // var features = new ol.format.GeoJSON().readFeatures(geojsonObject, {
+    //     featureProjection: 'EPSG:3857'
+    // });
+    // var source = new ol.source.Vector({
+    //     features: features
+    // });
+    //
+    // var layer = new ol.layer.Image({
+    //     title: label,
+    //     source: new ol.source.ImageVector({
+    //         source: source,
+    //         style: styling
+    //     })
+    // });
+    // mapFilter.addLayer(layer);
 }
 
 
