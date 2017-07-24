@@ -75,14 +75,14 @@ def query(endpoint, cell_id):
   semagrow.setQuery("""
   PREFIX  strdf: <http://strdf.di.uoa.gr/ontology#>
 
-  SELECT  ?geoname ?lat ?long ?population
+  SELECT  ?geoname ?lat ?long ?name ?population
   WHERE
     { <http://iit.demokritos.gr/%s> strdf:hasGeometry ?geometry .
       ?geoname  <http://www.opengis.net/ont/geosparql#asWKT>  ?point ;
-		<http://www.geonames.org/ontology#featureClass>  <http://www.geonames.org/ontology#P> ;
-		<http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?lat ;
-		<http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?long ;
-		<http://www.geonames.org/ontology#population>  ?population .
+                <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?lat ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?long ;
+                <http://www.geonames.org/ontology#name> ?name ;
+                <http://www.geonames.org/ontology#population>  ?population .
       FILTER strdf:within(?point, ?geometry)
     }
   """%cell_id)
@@ -523,39 +523,36 @@ def get_closest(date, level):
 
 @app.route('/population/', methods=['POST'])
 def population():
-    resparr = request.get_json(force=True)
-    affected = []
+    disp = request.get_json(force=True)
     start = time.time()
-    for disp in resparr['dispersions']:
-        disp = json.loads(disp)
-        multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
-        affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
-        affected_ids = list(set(affected_ids))
-        # affected_ids = [57932,57933,57934,57935,0,1]
-        multi_points = []
-        for id in affected_ids:
-            try:
-                results = query('http://127.0.0.1:8585/SemaGrow/query',id)
-                points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
-                population = [int(res['population']['value']) for res in results['results']['bindings']]
-                geoname = [res['geoname']['value'] for res in results['results']['bindings']]
-                mp = {}
-                mp['population'] = population
-                mp['geoname'] = geoname
-                mp['points'] = points
-                multi_points.append(mp)
-            except:
-                pass
-        jpols = []
-        for p,point in enumerate(multi_points):
-            for c,i in enumerate(point['points']):
-                jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c])}, geometry=mapping(point['points'][c])))
-        end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
-        affected.append(end_res)
-        timing(start,time.time())
-        start = time.time()
-    resparr['affected'] = affected
-    return json.dumps(resparr)
+    disp = json.loads(disp)
+    multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
+    affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
+    # affected_ids = list(set(affected_ids))
+    affected_ids = [57932,57933,57934,57935,0,1]
+    multi_points = []
+    for id in affected_ids:
+        try:
+            results = query('http://127.0.0.1:8585/SemaGrow/query',id)
+            points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
+            population = [int(res['population']['value']) for res in results['results']['bindings']]
+            geoname = [res['geoname']['value'] for res in results['results']['bindings']]
+            name = [res['name']['value'] for res in results['results']['bindings']]
+            mp = {}
+            mp['population'] = population
+            mp['geoname'] = geoname
+            mp['points'] = points
+            mp['name'] = name
+            multi_points.append(mp)
+        except:
+            pass
+    jpols = []
+    for p,point in enumerate(multi_points):
+        for c,i in enumerate(point['points']):
+            jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c],"NAME":unicode(point['name'][c])}, geometry=mapping(point['points'][c])))
+    end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
+    timing(start,time.time())
+    return json.dumps(end_res)
 
 if __name__ == '__main__':
     print 'Loading grid cells.......'

@@ -641,24 +641,10 @@ function estimateLocation() {
                     res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th></tr>';
                     for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td></tr>';
+                            resp.affected = [{},{},{}];
+                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a onClick="getPopulation(' + i + ')">Draw population</td></tr>';
                         }
                     }
-                    $.ajax({
-                        type: 'POST',
-                        url: listener_ip + "population/",
-                        data: JSON.stringify(resp),
-                        success: function(result) {
-                            resp = JSON.parse(result);
-                            slider.style.display = 'block';
-                            thres.style.display = 'block'
-                            res_str += '</table>';
-                            res.innerHTML = res_str;
-                            loader.style.display = 'none';
-                            eheader.style.display = 'block';
-                        },
-                        async: false
-                    });
                 } else {
                     alert('Either detection points are out of grid or there is no overlap between detection points and calculated dispersions');
                     loader.style.display = 'none';
@@ -673,6 +659,25 @@ function estimateLocation() {
     }
 }
 
+
+function getPopulation(idx){
+  $.ajax({
+      type: 'POST',
+      url: listener_ip + "population/",
+      data: JSON.stringify(resp.dispersion[idx]),
+      success: function(result) {
+          pop_result = JSON.parse(result);
+          resp.affected[idx] = pop_result;
+          slider.style.display = 'block';
+          thres.style.display = 'block'
+          res_str += '</table>';
+          res.innerHTML = res_str;
+          loader.style.display = 'none';
+          eheader.style.display = 'block';
+      },
+      async: false
+  });
+}
 
 
 function drawDispersion(idx) {
@@ -780,6 +785,7 @@ function drawPopGrid(idx, thres) {
                   })
               });
         feat.set('uri',geojsonObject.features[i].properties['URI']);
+        feat.set('name',geojsonObject.features[i].properties['NAME']);
         feat.setStyle(style);
         var vec = vector.getSource();
         vec.addFeature(feat);
