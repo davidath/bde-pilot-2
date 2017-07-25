@@ -45,15 +45,7 @@ exper = None
 conn = None
 cur = None
 dpass = getpass.getpass()
-print 'Loading grid cells.......'
-cell_pols = load_gridcells()
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
-
-
-def timing(start, end):
-    hours, rem = divmod(end - start, 3600)
-    minutes, seconds = divmod(rem, 60)
-    print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
 
 def load_gridcells():
     with open('dispersion_grid.json') as ff:
@@ -72,6 +64,16 @@ def load_gridcells():
         cell_pol['obj'] = pol
         cell_pols.append(cell_pol)
     return cell_pols
+
+
+print 'Loading grid cells.......'
+cell_pols = load_gridcells()
+
+def timing(start, end):
+    hours, rem = divmod(end - start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 
