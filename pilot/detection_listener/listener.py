@@ -572,7 +572,8 @@ def pop(disp):
     # batch_idx = range(len(affected_ids))
     # affected_ids = [57932,57933,57934,57935,0,1]
     multi_points = []
-    for id in batch_idx:
+    # for id in batch_idx:
+    for id in affected_ids:
         try:
             # results = query_mult('http://10.0.10.12:9999/SemaGrow/query',batch_idx[id:id+batch_size])
             results = query('http://10.0.10.12:9999/SemaGrow/query',id)
