@@ -641,7 +641,7 @@ function estimateLocation() {
                     res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;"></th></tr>';
                     for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a onClick="getPopulation(' + i + ')">Draw population</td></tr>';
+                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a onClick="checkPop(' + i + ')">Draw population</td></tr>';
                             }
                           }
                     res_str += '</table>';
@@ -663,42 +663,52 @@ function estimateLocation() {
     }
 }
 
+function initPop(idx){
+  affected = resp['affected'][idx];
+  var max;
+  for (var i = 0; i < affected['features'].length; i++) {
+      if (!max || parseInt(affected['features'][i]['properties']['POP']) > max) {
+          max = parseInt(affected['features'][i]['properties']['POP']);
+      }
+  }
+  var min;
+  for (var i = 0; i < affected['features'].length; i++) {
+      if (!min || parseInt(affected['features'][i]['properties']['POP']) < min) {
+          min = parseInt(affected['features'][i]['properties']['POP']);
+      }
+  }
+  drawDispersion(idx);
+  var slider = document.getElementById('p_slider');
+  slider.min = min;
+  slider.max = max;
+  $('input[type="range"]').rangeslider('update', true);
+}
 
 function getPopulation(idx){
   var slider = document.getElementById('div_slider');
   var thres = document.getElementById('p_thres');
-  if (JSON.stringify(resp.affected[idx]) === JSON.stringify({})) {
-        $.ajax({
-            type: 'POST',
-            url: listener_ip + "population/",
-            data: JSON.stringify(resp.dispersions[idx]),
-            success: function(result) {
-                var pop_result = JSON.parse(result);
-                resp.affected[idx] = pop_result;
-                slider.style.display = 'block';
-                thres.style.display = 'block'
-            },
-            async: false
-        });
+  $.ajax({
+      type: 'POST',
+      url: listener_ip + "population/",
+      data: JSON.stringify(resp.dispersions[idx]),
+      success: function(result) {
+          var pop_result = JSON.parse(result);
+          resp.affected[idx] = pop_result;
+          slider.style.display = 'block';
+          thres.style.display = 'block'
+          initPop(idx);
+      },
+      async: false
+  });
+}
+
+function checkPop(idx){
+    if (JSON.stringify(resp.affected[idx]) === JSON.stringify({})) {
+      getPopulation(idx);
     }
-    affected = resp['affected'][idx];
-    var max;
-    for (var i = 0; i < affected['features'].length; i++) {
-        if (!max || parseInt(affected['features'][i]['properties']['POP']) > max) {
-            max = parseInt(affected['features'][i]['properties']['POP']);
-        }
+    else{
+      initPop(idx);
     }
-    var min;
-    for (var i = 0; i < affected['features'].length; i++) {
-        if (!min || parseInt(affected['features'][i]['properties']['POP']) < min) {
-            min = parseInt(affected['features'][i]['properties']['POP']);
-        }
-    }
-    drawDispersion(idx);
-    var slider = document.getElementById('p_slider');
-    slider.min = min;
-    slider.max = max;
-    $('input[type="range"]').rangeslider('update', true);
 }
 
 
