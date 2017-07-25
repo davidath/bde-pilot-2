@@ -20,6 +20,7 @@ import cPickle
 import gzip
 from sklearn.preprocessing import maxabs_scale, scale, minmax_scale
 from scipy.ndimage.filters import gaussian_filter
+from shapely.geometry import shape, Point, Polygon, mapping, MultiPolygon, MultiPoint
 import scipy.misc
 import threading
 import Queue
@@ -43,6 +44,55 @@ cur = None
 # dpass = getpass.getpass()
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
+def timing(start, end):
+    hours, rem = divmod(end - start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+
+def load_gridcells():
+    with open('dispersion_grid.json') as ff:
+         cells = json.load(ff)
+
+    cell_pols = []
+    for cell in cells:
+        points = []
+        points.append(Point(float(cell['bottom_left']['lon']),float(cell['bottom_left']['lat'])))
+        points.append(Point(float(cell['top_left']['lon']),float(cell['top_left']['lat'])))
+        points.append(Point(float(cell['top_right']['lon']),float(cell['top_right']['lat'])))
+        points.append(Point(float(cell['bottom_right']['lon']),float(cell['bottom_right']['lat'])))
+        pol = Polygon([[p.x, p.y] for p in points])
+        cell_pol = {}
+        cell_pol['id'] = cell['id']
+        cell_pol['obj'] = pol
+        cell_pols.append(cell_pol)
+    return cell_pols
+
+from SPARQLWrapper import SPARQLWrapper, JSON
+
+def query(endpoint, cell_id):
+
+  semagrow = SPARQLWrapper(endpoint)
+
+  semagrow.setQuery("""
+  PREFIX  strdf: <http://strdf.di.uoa.gr/ontology#>
+
+  SELECT  ?geoname ?lat ?long ?name ?population
+  WHERE
+    { <http://iit.demokritos.gr/%s> strdf:hasGeometry ?geometry .
+      ?geoname  <http://www.opengis.net/ont/geosparql#asWKT>  ?point ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?lat ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?long ;
+                <http://www.geonames.org/ontology#name> ?name ;
+                <http://www.geonames.org/ontology#population>  ?population .
+      FILTER strdf:within(?point, ?geometry)
+    }
+  """%cell_id)
+
+  semagrow.setReturnFormat(JSON)
+
+  results = semagrow.queryAndConvert()
+
+  return results
 
 def dispersion_integral(dataset_name):
     dataset = Dataset(APPS_ROOT + '/' + dataset_name, 'r')
@@ -507,6 +557,42 @@ def get_closest(date, level):
     else:
         return json.dumps(res[2])
 
+@app.route('/population/', methods=['POST'])
+def population():
+    disp = request.get_json(force=True)
+    start = time.time()
+    disp = json.loads(disp)
+    multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
+    affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
+    # affected_ids = list(set(affected_ids))
+    affected_ids = [57932,57933,57934,57935,0,1]
+    multi_points = []
+    for id in affected_ids:
+        try:
+            results = query('http://127.0.0.1:8585/SemaGrow/query',id)
+            points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
+            population = [int(res['population']['value']) for res in results['results']['bindings']]
+            geoname = [res['geoname']['value'] for res in results['results']['bindings']]
+            name = [res['name']['value'] for res in results['results']['bindings']]
+            mp = {}
+            mp['population'] = population
+            mp['geoname'] = geoname
+            mp['points'] = points
+            mp['name'] = name
+            multi_points.append(mp)
+        except:
+            pass
+    jpols = []
+    for p,point in enumerate(multi_points):
+        for c,i in enumerate(point['points']):
+            jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c]),"NAME":unicode(point['name'][c])}, geometry=mapping(point['points'][c])))
+    end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
+    timing(start,time.time())
+    time.sleep(60)
+    return json.dumps(end_res)
+
+print 'Loading grid cells.......'
+cell_pols = load_gridcells()
 with open('db_info.json', 'r') as data_file:
      dbpar = json.load(data_file)
 conn = psycopg2.connect("dbname='" + dbpar['dbname'] + "' user='" + dbpar['user'] +
