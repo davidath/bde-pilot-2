@@ -102,11 +102,11 @@ def query(endpoint, cell_id):
 
   return results
 
-def query(endpoint, *cell_id):
+def query_mult(endpoint, cell_id):
 
   values = ""
   for id in cell_id:
-    values = values + "<http://iit.demokritos.gr/"+id+"> "
+    values = values + "<http://iit.demokritos.gr/"+str(id)+"> "
 
   semagrow = SPARQLWrapper(endpoint)
 
@@ -573,7 +573,7 @@ def pop(disp):
     multi_points = []
     for id in batch_idx:
         try:
-            results = query('http://10.0.10.12:9999/SemaGrow/query',batch_idx[id:id+batch_size])
+            results = query_mult('http://10.0.10.12:9999/SemaGrow/query',batch_idx[id:id+batch_size])
             print len(results)
             points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
             population = [int(res['population']['value']) for res in results['results']['bindings']]
