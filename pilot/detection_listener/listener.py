@@ -568,8 +568,11 @@ def pop(disp):
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
     affected_ids = list(set(affected_ids))
-    # batch_size = 10
+    batch_size = 10
     batch_idx = range(len(affected_ids))
+    print len(affected_ids)
+    batch_idx = batch_idx[0::batch_size]
+    print len(batch_idx)
     # affected_ids = [57932,57933,57934,57935,0,1]
     multi_points = []
     for id in batch_idx:
