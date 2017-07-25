@@ -45,6 +45,8 @@ exper = None
 conn = None
 cur = None
 dpass = getpass.getpass()
+print 'Loading grid cells.......'
+cell_pols = load_gridcells()
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -527,7 +529,7 @@ def get_closest(date, level):
         return json.dumps(res[2])
 
 
-def pop(cell_pols,disp):
+def pop(disp):
     start = time.time()
     disp = json.loads(disp)
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
@@ -564,16 +566,16 @@ def pop(cell_pols,disp):
 @app.route('/population/', methods=['POST'])
 def population():
     disp = request.get_json(force=True)
-    task = go_async.apply_async(args=[cell_pols,disp])
+    task = go_async.apply_async(args=[disp])
     response = {
         'id': task.id
     }
     return jsonify(response)
 
 @celery.task(bind=True)
-def go_async(self, cell_pols, disp):
+def go_async(self, disp):
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
-            'result': pop(cell_pols, disp)}
+            'result': pop(disp)}
 
 @app.route('/status/<task_id>')
 def taskstatus(task_id):
@@ -606,8 +608,6 @@ def taskstatus(task_id):
 
 
 if __name__ == '__main__':
-    print 'Loading grid cells.......'
-    cell_pols = load_gridcells()
     with open('db_info.json', 'r') as data_file:
         dbpar = json.load(data_file)
     conn = psycopg2.connect("dbname='" + dbpar['dbname'] + "' user='" + dbpar['user'] +
