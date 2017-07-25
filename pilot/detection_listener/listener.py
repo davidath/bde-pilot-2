@@ -568,18 +568,18 @@ def pop(disp):
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
     affected_ids = list(set(affected_ids))
-    batch_size = 10
-    batch_idx = range(len(affected_ids))
-    print len(affected_ids)
-    batch_idx = batch_idx[0::batch_size]
-    print len(batch_idx)
+    # batch_size = 10
+    # batch_idx = range(len(affected_ids))
+    # print len(affected_ids)
+    # batch_idx = batch_idx[0::batch_size]
+    # print len(batch_idx)
     # affected_ids = [57932,57933,57934,57935,0,1]
     multi_points = []
-    for id in batch_idx:
-    # for id in affected_ids:
+    # for id in batch_idx:
+    for id in affected_ids:
         try:
-            results = query_mult('http://10.0.10.12:9999/SemaGrow/query',affected_ids[id:id+batch_size])
-            # results = query('http://10.0.10.12:9999/SemaGrow/query',id)
+            # results = query_mult('http://10.0.10.12:9999/SemaGrow/query',affected_ids[id:id+batch_size])
+            results = query('http://10.0.10.12:9999/SemaGrow/query',id)
             points = [(Point(float(res['long']['value']),float(res['lat']['value'])),int(res['population']['value']),res['geoname']['value'],res['name']['value']) for res in results['results']['bindings']]
             multi_points.append(points)
         except:
