@@ -704,7 +704,7 @@ function getPopulation(idx){
           click.style.display = 'block';
           initPop(idx);
       },
-      async: true
+      async: false
   });
 }
 
