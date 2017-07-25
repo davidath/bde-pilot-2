@@ -584,7 +584,7 @@ def pop(disp):
     timing(start,time.time())
     start = time.time()
     for p,point in enumerate(multi_points):
-        jpols.append(dict(type='Feature', properties={"POP":unicode(point[1]),"URI":unicode(point[2]),"NAME":unicode(point[3])}, geometry=mapping(point[0]))
+        jpols.append(dict(type='Feature', properties={"POP":unicode(point[1]),"URI":unicode(point[2]),"NAME":unicode(point[3])}, geometry=mapping(point[0])))
     end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
     timing(start,time.time())
     with open('exp.json','w') as f:
