@@ -528,8 +528,8 @@ def population():
     disp = json.loads(disp)
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
-    # affected_ids = list(set(affected_ids))
-    affected_ids = [57932,57933,57934,57935,0,1]
+    affected_ids = list(set(affected_ids))
+    # affected_ids = [57932,57933,57934,57935,0,1]
     multi_points = []
     for id in affected_ids:
         try:
@@ -552,7 +552,6 @@ def population():
             jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c]),"NAME":unicode(point['name'][c])}, geometry=mapping(point['points'][c])))
     end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
     timing(start,time.time())
-    time.sleep(120)
     return json.dumps(end_res)
 
 if __name__ == '__main__':
