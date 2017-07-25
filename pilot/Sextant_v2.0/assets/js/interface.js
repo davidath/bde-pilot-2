@@ -664,6 +664,27 @@ function estimateLocation() {
 }
 
 
+function initPop(idx){
+  affected = resp['affected'][idx];
+  var max;
+  for (var i = 0; i < affected['features'].length; i++) {
+      if (!max || parseInt(affected['features'][i]['properties']['POP']) > max) {
+          max = parseInt(affected['features'][i]['properties']['POP']);
+      }
+  }
+  var min;
+  for (var i = 0; i < affected['features'].length; i++) {
+      if (!min || parseInt(affected['features'][i]['properties']['POP']) < min) {
+          min = parseInt(affected['features'][i]['properties']['POP']);
+      }
+  }
+  drawDispersion(idx);
+  var slider = document.getElementById('p_slider');
+  slider.min = min;
+  slider.max = max;
+  $('input[type="range"]').rangeslider('update', true);
+}
+
 function getPopulation(idx){
   var slider = document.getElementById('div_slider');
   var thres = document.getElementById('p_thres');
@@ -671,98 +692,34 @@ function getPopulation(idx){
   var load = document.getElementById('loader_ic_'+idx);
   load.style.display = 'block';
   click.style.display = 'none';
-  if (JSON.stringify(resp.affected[idx]) === JSON.stringify({})) {
-        $.ajax({
-            type: 'POST',
-            url: listener_ip + "population/",
-            data: JSON.stringify(resp.dispersions[idx]),
-            success: function(result) {
-                var pop_result = JSON.parse(result);
-                resp.affected[idx] = pop_result;
-                slider.style.display = 'block';
-                thres.style.display = 'block'
-                load.style.display = 'none';
-                click.style.display = 'block';
-            },
-            async: false
-        });
-    }
-    affected = resp['affected'][idx];
-    var max;
-    for (var i = 0; i < affected['features'].length; i++) {
-        if (!max || parseInt(affected['features'][i]['properties']['POP']) > max) {
-            max = parseInt(affected['features'][i]['properties']['POP']);
-        }
-    }
-    var min;
-    for (var i = 0; i < affected['features'].length; i++) {
-        if (!min || parseInt(affected['features'][i]['properties']['POP']) < min) {
-            min = parseInt(affected['features'][i]['properties']['POP']);
-        }
-    }
-    drawDispersion(idx);
-    var slider = document.getElementById('p_slider');
-    slider.min = min;
-    slider.max = max;
-    $('input[type="range"]').rangeslider('update', true);
+  $.ajax({
+      type: 'POST',
+      url: listener_ip + "population/",
+      data: JSON.stringify(resp.dispersions[idx]),
+      success: function(result) {
+          var pop_result = JSON.parse(result);
+          resp.affected[idx] = pop_result;
+          slider.style.display = 'block';
+          thres.style.display = 'block'
+          load.style.display = 'none';
+          click.style.display = 'block';
+          initPop(idx);
+      },
+      async: false
+  });
 }
 
-// function initPop(idx){
-//   affected = resp['affected'][idx];
-//   var max;
-//   for (var i = 0; i < affected['features'].length; i++) {
-//       if (!max || parseInt(affected['features'][i]['properties']['POP']) > max) {
-//           max = parseInt(affected['features'][i]['properties']['POP']);
-//       }
-//   }
-//   var min;
-//   for (var i = 0; i < affected['features'].length; i++) {
-//       if (!min || parseInt(affected['features'][i]['properties']['POP']) < min) {
-//           min = parseInt(affected['features'][i]['properties']['POP']);
-//       }
-//   }
-//   drawDispersion(idx);
-//   var slider = document.getElementById('p_slider');
-//   slider.min = min;
-//   slider.max = max;
-//   $('input[type="range"]').rangeslider('update', true);
-// }
-
-// function getPopulation(idx){
-//   var slider = document.getElementById('div_slider');
-//   var thres = document.getElementById('p_thres');
-//   var click = document.getElementById('click_'+idx);
-//   var load = document.getElementById('loader_ic_'+idx);
-//   load.style.display = 'block';
-//   click.style.display = 'none';
-//   $.ajax({
-//       type: 'POST',
-//       url: listener_ip + "population/",
-//       data: JSON.stringify(resp.dispersions[idx]),
-//       success: function(result) {
-//           var pop_result = JSON.parse(result);
-//           resp.affected[idx] = pop_result;
-//           slider.style.display = 'block';
-//           thres.style.display = 'block'
-//           load.style.display = 'none';
-//           click.style.display = 'block';
-//           initPop(idx);
-//       },
-//       async: false
-//   });
-// }
 
 
+function checkPop(idx){
+    if (JSON.stringify(resp.affected[idx]) === JSON.stringify({})) {
+      getPopulation(idx);
+    }
+    else{
+      initPop(idx);
+    }
+}
 
-// function checkPop(idx){
-//     if (JSON.stringify(resp.affected[idx]) === JSON.stringify({})) {
-//       getPopulation(idx);
-//     }
-//     else{
-//       initPop(idx);
-//     }
-// }
-//
 
 function drawDispersion(idx) {
     var styling = null;
