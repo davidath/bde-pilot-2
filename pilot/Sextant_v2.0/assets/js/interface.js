@@ -641,7 +641,7 @@ function estimateLocation() {
                     res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;"></th></tr>';
                     for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a onClick="checkPop(' + i + ')">Draw population</td></tr>';
+                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a id="click_'+i+'"onClick="checkPop(' + i + ')">Draw population</a><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
                             }
                           }
                     res_str += '</table>';
@@ -687,6 +687,10 @@ function initPop(idx){
 function getPopulation(idx){
   var slider = document.getElementById('div_slider');
   var thres = document.getElementById('p_thres');
+  var click = document.getElementById('click_'+idx);
+  var load = document.getElementById('loader_ic_'+idx);
+  load.style.display = 'block';
+  click.style.display = 'none';
   $.ajax({
       type: 'POST',
       url: listener_ip + "population/",
@@ -696,9 +700,11 @@ function getPopulation(idx){
           resp.affected[idx] = pop_result;
           slider.style.display = 'block';
           thres.style.display = 'block'
+          load.style.display = 'none';
+          click.style.display = 'block';
           initPop(idx);
       },
-      async: false
+      async: true
   });
 }
 
