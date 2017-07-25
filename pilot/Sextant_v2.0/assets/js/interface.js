@@ -720,22 +720,21 @@ function getPopulation(idx){
 }
 
 function checkTaskProgress(id,idx){
-  var slider = document.getElementById('div_slider');
-  var thres = document.getElementById('p_thres');
-  var click = document.getElementById('click_'+idx);
-  var load = document.getElementById('loader_ic_'+idx);
   var req = new XMLHttpRequest();
     req.open("GET", listener_ip+"status/" + id, true);
     req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
     req.send();
     req.onloadend = function() {
-      alert(task);
       var task = JSON.parse(req.responseText);
       if (task['state'] != 'PENDING' && task['state'] != 'PROGRESS') {
+            var slider = document.getElementById('div_slider');
+            var thres = document.getElementById('p_thres');
+            var click = document.getElementById('click_'+idx);
+            var load = document.getElementById('loader_ic_'+idx);
             var pop_result = JSON.parse(task['result']);
             resp.affected[idx] = pop_result;
             slider.style.display = 'block';
-            thres.style.display = 'block'
+            thres.style.display = 'block';
             load.style.display = 'none';
             click.style.display = 'block';
             initPop(idx);
