@@ -575,7 +575,21 @@ function metriccheckedVal() {
     }
 }
 
-
+function uiCheck(idx){
+  var rlist = document.getElementById('ui_form_'+idx);
+  var val;
+  for (var i = 0; i < rlist.length; i++) {
+      if (rlist[i].checked) {
+          val =  rlist[i].value;
+      }
+  }
+  if (val === 'disp'){
+     drawDispersion(idx);
+  }
+  else{
+     checkPop(idx)
+  }
+}
 
 
 var geo = undefined;
@@ -638,12 +652,12 @@ function estimateLocation() {
             req.onloadend = function() {
                 resp = JSON.parse(req.responseText);
                 if (resp["scores"][0] - resp["scores"][2] != 0) {
-                    res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;"></th></tr>';
+                    res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;">Draw Dispersion/Population</th></tr>';
                     for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a id="click_'+i+'"onClick="checkPop(' + i + ')">Draw population</a><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
+                            res_str += '<tr><td style="padding: 8px;">'+resp['stations'][i] + '</td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><input type="radio" onClick=uiCheck('+i+')name="ui_opt" value="disp"><form id="ui_form_'+i+'"><input type="radio" onClick=uiCheck('+i+') name="ui_opt" value="pop"></form><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
                             }
-                          }
+                    }
                     res_str += '</table>';
                     res.innerHTML = res_str;
                     resp.affected = [{},{},{}];
