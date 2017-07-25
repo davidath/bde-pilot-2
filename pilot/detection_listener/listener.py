@@ -560,6 +560,7 @@ def get_closest(date, level):
     else:
         return json.dumps(res[2])
 
+from itertools import chain
 
 def pop(disp):
     start = time.time()
@@ -574,23 +575,16 @@ def pop(disp):
     for id in batch_idx:
         try:
             results = query_mult('http://10.0.10.12:9999/SemaGrow/query',batch_idx[id:id+batch_size])
-            print len(results)
-            points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
-            population = [int(res['population']['value']) for res in results['results']['bindings']]
-            geoname = [res['geoname']['value'] for res in results['results']['bindings']]
-            name = [res['name']['value'] for res in results['results']['bindings']]
-            mp = {}
-            mp['population'] = population
-            mp['geoname'] = geoname
-            mp['points'] = points
-            mp['name'] = name
-            multi_points.append(mp)
+            points = [(Point(float(res['long']['value']),float(res['lat']['value'])),int(res['population']['value']),res['geoname']['value'],res['name']['value']) for res in results['results']['bindings']]
+            multi_points.append(points)
         except:
             pass
+    multi_points = list(chain.from_iterable(multi_points))
     jpols = []
+    timing(start,time.time())
+    start = time.time()
     for p,point in enumerate(multi_points):
-        for c,i in enumerate(point['points']):
-            jpols.append(dict(type='Feature', properties={"POP":unicode(point['population'][c]),"URI":unicode(point['geoname'][c]),"NAME":unicode(point['name'][c])}, geometry=mapping(point['points'][c])))
+        jpols.append(dict(type='Feature', properties={"POP":unicode(point[1]),"URI":unicode(point[2]),"NAME":unicode(point[3]}, geometry=mapping(point[0]))
     end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
     timing(start,time.time())
     with open('exp.json','w') as f:
