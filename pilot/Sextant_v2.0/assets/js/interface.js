@@ -2,7 +2,7 @@
  * Zoom to all layers
  */
 
-var listener_ip = "http://127.0.0.1:5000/";
+var listener_ip = "http://143.233.226.33:8084/";
 
 function zoomToAll(mode) {
     var first = true;
@@ -698,7 +698,7 @@ function getPopulation(idx){
       data: JSON.stringify(resp.dispersions[idx]),
       success: function(result) {
         var task = JSON.parse(result);
-        checkTaskProgress(resp['id']);
+        checkTaskProgress(task['id']);
       },
       async: true
     });
@@ -729,6 +729,7 @@ function checkTaskProgress(id){
     req.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
     req.send();
     req.onloadend = function() {
+      alert(task);
       var task = JSON.parse(req.responseText);
       if (task['state'] != 'PENDING' && task['state'] != 'PROGRESS') {
             var pop_result = JSON.parse(task['result']);

@@ -572,7 +572,7 @@ def population():
     response = {
         'id': task.id
     }
-    return jsonify(response)
+    return json.dumps(response)
 
 @celery.task(bind=True)
 def go_async(self, disp):
