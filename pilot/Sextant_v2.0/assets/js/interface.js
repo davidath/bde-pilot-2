@@ -641,7 +641,7 @@ function estimateLocation() {
                     res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;"></th></tr>';
                     for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a id="click_'+i+'"onClick="getPopulation(' + i + ')">Draw population</a><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
+                            res_str += '<tr><td style="padding: 8px;"><a onClick="drawDispersion(' + i + ')">' + resp['stations'][i] + '</a></td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><a id="click_'+i+'"onClick="checkPop(' + i + ')">Draw population</a><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
                             }
                           }
                     res_str += '</table>';
