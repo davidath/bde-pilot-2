@@ -727,10 +727,12 @@ function checkTaskProgress(id,idx){
     req.onloadend = function() {
       var task = JSON.parse(req.responseText);
       if (task['state'] != 'PENDING' && task['state'] != 'PROGRESS') {
+            alert(idx);
             var slider = document.getElementById('div_slider');
             var thres = document.getElementById('p_thres');
             var click = document.getElementById('click_'+idx);
             var load = document.getElementById('loader_ic_'+idx);
+            alert(load.style.display);
             var pop_result = JSON.parse(task['result']);
             resp.affected[idx] = pop_result;
             slider.style.display = 'block';
