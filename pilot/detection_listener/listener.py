@@ -1,5 +1,5 @@
 from web import app
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import json
 from netcdf_subset import netCDF_subset
@@ -527,7 +527,7 @@ def get_closest(date, level):
         return json.dumps(res[2])
 
 
-def pop(disp):
+def pop(cell_pols,disp):
     start = time.time()
     disp = json.loads(disp)
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
@@ -537,7 +537,7 @@ def pop(disp):
     multi_points = []
     for id in affected_ids:
         try:
-            results = query('http://127.0.0.1:8585/SemaGrow/query',id)
+            results = query('http://10.0.10.12:9999/SemaGrow/query',id)
             points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
             population = [int(res['population']['value']) for res in results['results']['bindings']]
             geoname = [res['geoname']['value'] for res in results['results']['bindings']]
@@ -564,16 +564,16 @@ def pop(disp):
 @app.route('/population/', methods=['POST'])
 def population():
     disp = request.get_json(force=True)
-    task = go_async.apply_async(args=[disp])
+    task = go_async.apply_async(args=[cell_pols,disp])
     response = {
         'id': task.id
     }
     return jsonify(response)
 
 @celery.task(bind=True)
-def go_async(self, disp):
+def go_async(self, cell_pols, disp):
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
-            'result': pop(disp)}
+            'result': pop(cell_pols, disp)}
 
 @app.route('/status/<task_id>')
 def taskstatus(task_id):
