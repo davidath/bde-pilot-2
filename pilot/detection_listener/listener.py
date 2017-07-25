@@ -23,13 +23,18 @@ from scipy.ndimage.filters import gaussian_filter
 import scipy.misc
 from shapely.geometry import shape, Point, Polygon, mapping, MultiPolygon, MultiPoint
 import random
-
+from celery import Celery
 
 BOOTSTRAP_SERVE_LOCAL = True
 app = Flask(__name__)
 CORS(app)
 
 app.config.from_object(__name__)
+app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
 
 
 inp = None
@@ -568,7 +573,7 @@ def population():
 @celery.task(bind=True)
 def go_async(self, disp):
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
-            'result': pop(disp))}
+            'result': pop(disp)}
 
 @app.route('/status/<task_id>')
 def taskstatus(task_id):
