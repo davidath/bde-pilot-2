@@ -655,7 +655,7 @@ function estimateLocation() {
                     res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;">Draw</th></tr>';
                     for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                            res_str += '<tr><td style="padding: 8px;">'+resp['stations'][i] + '</td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><form id="ui_form_'+i+'"><input type="radio" onClick=uiCheck('+i+')name="ui_opt" value="disp">Dispersion<input type="radio" onClick=uiCheck('+i+') name="ui_opt" value="pop">Population</form><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
+                            res_str += '<tr><td style="padding: 8px;">'+resp['stations'][i] + '</td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><form id="ui_form_'+i+'"><input type="radio" onClick=uiCheck('+i+') name="ui_opt" value="disp">Dispersion<input type="radio" onClick=uiCheck('+i+') name="ui_opt" value="pop">Population</form><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
                             }
                     }
                     res_str += '</table>';
@@ -702,7 +702,7 @@ function initPop(idx){
 function getPopulation(idx){
   var slider = document.getElementById('div_slider');
   var thres = document.getElementById('p_thres');
-  var click = document.getElementById('click_'+idx);
+  var click = document.getElementById('ui_form_'+idx);
   var load = document.getElementById('loader_ic_'+idx);
   load.style.display = 'block';
   click.style.display = 'none';
@@ -743,7 +743,7 @@ function checkTaskProgress(id,idx){
       if (task['state'] != 'PENDING' && task['state'] != 'PROGRESS') {
             var slider = document.getElementById('div_slider');
             var thres = document.getElementById('p_thres');
-            var click = document.getElementById('click_'+idx);
+            var click = document.getElementById('ui_form_'+idx);
             var load = document.getElementById('loader_ic_'+idx);
             var pop_result = JSON.parse(task['result']);
             resp.affected[idx] = pop_result;
