@@ -102,6 +102,36 @@ def query(endpoint, cell_id):
 
   return results
 
+def query(endpoint, *cell_id):
+
+  values = ""
+  for id in cell_id:
+    values = values + "<http://iit.demokritos.gr/"+id+"> "
+
+  semagrow = SPARQLWrapper(endpoint)
+
+  semagrow.setQuery("""
+  PREFIX  strdf: <http://strdf.di.uoa.gr/ontology#>
+
+  SELECT  ?geoname ?lat ?long ?name ?population
+  WHERE
+    { ?cellid strdf:hasGeometry ?geometry .
+      ?geoname  <http://www.opengis.net/ont/geosparql#asWKT>  ?point ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?lat ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?long ;
+                <http://www.geonames.org/ontology#name> ?name ;
+                <http://www.geonames.org/ontology#population>  ?population .
+      VALUES ?cellid { %s }
+      FILTER strdf:within(?point, ?geometry)
+    }
+  """%values)
+
+  semagrow.setReturnFormat(JSON)
+
+  results = semagrow.queryAndConvert()
+
+  return results
+
 def dispersion_integral(dataset_name):
     dataset = Dataset(APPS_ROOT + '/' + dataset_name, 'r')
     dsout = Dataset(APPS_ROOT + '/' + 'int_' + dataset_name,
@@ -537,11 +567,14 @@ def pop(disp):
     multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
     affected_ids = list(set(affected_ids))
+    batch_size = 10
+    batch_idx = range(len(affected_ids))
     # affected_ids = [57932,57933,57934,57935,0,1]
     multi_points = []
-    for id in affected_ids:
+    for id in batch_idx:
         try:
-            results = query('http://10.0.10.12:9999/SemaGrow/query',id)
+            results = query('http://10.0.10.12:9999/SemaGrow/query',batch_idx[id:id+batch_size])
+            print len(results)
             points = [Point(float(res['long']['value']),float(res['lat']['value'])) for res in results['results']['bindings']]
             population = [int(res['population']['value']) for res in results['results']['bindings']]
             geoname = [res['geoname']['value'] for res in results['results']['bindings']]

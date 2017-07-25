@@ -640,7 +640,7 @@ function estimateLocation() {
                     res_str = 'Estimated sources: <br> <table style="border-collapse: collapse;"><tr><th style="padding: 8px;">Station<br>name</th><th style="padding: 8px;">Score</th><th style="padding: 8px;">Draw</th></tr>';
                     for (var i = 0; i < resp['scores'].length; i++) {
                         if (resp['scores'][i] != 0) {
-                            res_str += '<tr><td style="padding: 8px;">'+resp['stations'][i] + '</td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><form id="ui_form_'+i+'"><button type="button" class="btn btn-primary" onclick="drawDispersion('+i+')">Plume weather</button><button type="button" class="btn btn-primary" onclick="checkPop('+i+')">Affected areas</button></form><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
+                            res_str += '<tr><td style="padding: 8px;">'+resp['stations'][i] + '</td><td style="padding: 8px;">' + resp['scores'][i] + '</td><td style="padding: 8px;"><form id="ui_form_'+i+'"><button type="button" class="btn btn-primary" onclick="drawDispersion('+i+')">Plume</button><button type="button" class="btn btn-primary" onclick="checkPop('+i+')">Affected areas</button></form><div id="loader_ic_'+i+'" class="loader" style="display:none;"></div></td></tr>';
                             }
                     }
                     res_str += '</table>';
