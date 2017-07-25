@@ -698,7 +698,7 @@ function getPopulation(idx){
       data: JSON.stringify(resp.dispersions[idx]),
       success: function(result) {
         var task = JSON.parse(result);
-        checkTaskProgress(task['id']);
+        checkTaskProgress(task['id'],idx);
       },
       async: true
     });
@@ -719,7 +719,7 @@ function getPopulation(idx){
   // });
 }
 
-function checkTaskProgress(id){
+function checkTaskProgress(id,idx){
   var slider = document.getElementById('div_slider');
   var thres = document.getElementById('p_thres');
   var click = document.getElementById('click_'+idx);
