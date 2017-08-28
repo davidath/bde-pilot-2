@@ -22,13 +22,11 @@ import threading
 import Queue
 import base64
 import itertools
+from dbconn import DBConn
 
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-with open('db_info.json', 'r') as data_file:
-    dbpar = json.load(data_file)
-conn = psycopg2.connect("dbname='" + dbpar['dbname'] + "' user='" + dbpar['user'] +
-                        "' host='" + dbpar['host'] + "' port='" + dbpar['port'] + "'password='" + base64.b64decode(dbpar['pass']) + "'")
+conn = DBConn().engine
 
 def dispersion_integral(dataset_name):
     dataset = Dataset(APPS_ROOT + '/' + dataset_name, 'r')
@@ -128,9 +126,9 @@ def calc_winddir(dataset_name, level):
 
 
 def load_class_weather(cur, date, origin):
-    cur.execute("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
+    resp = cur.execute("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
                 date + "' - date)/3600/24 as diff from weather order by diff desc;")
-    row = cur.fetchone()
+    row = resp.fetchone()
     if 'mult' in origin:
         items = cPickle.loads(str(row[2]))
         items = items.reshape(items.shape[0], -1)
@@ -178,9 +176,9 @@ def worker(batch,q,pollutant,det_map):
     q.put(disp_results)
 
 def calc_scores(cur, items, cln, pollutant,det_map,origin):
-    cur.execute(
+    resp = cur.execute(
         "SELECT date,hdfs_path,c137_pickle,i131_pickle from class where station=\'" + cln + "\';")
-    res = cur.fetchall()
+    res = resp.fetchall()
     batch_size = len(res) / 4
     idx = xrange(0,len(res),batch_size)
     queue = Queue.Queue()
@@ -194,8 +192,8 @@ def calc_scores(cur, items, cln, pollutant,det_map,origin):
     disp_results = list(itertools.chain.from_iterable(disp_results))
     print len(disp_results)
     disp_results = sorted(disp_results, key=lambda k: k[1], reverse=True)
-    cur.execute("SELECT date,GHT from weather;")
-    res = cur.fetchall()
+    resp = cur.execute("SELECT date,GHT from weather;")
+    res = resp.fetchall()
     weather_results = []
     for row in res:
         if 'mult' in origin:
@@ -215,9 +213,9 @@ def get_disp_frame(cur, cln, pollutant, results):
     dispersions = []
     scores = []
     print results[0]
-    cur.execute("select filename,hdfs_path,date,c137,i131 from class where  date=TIMESTAMP \'" +
+    resp = cur.execute("select filename,hdfs_path,date,c137,i131 from class where  date=TIMESTAMP \'" +
                 datetime.datetime.strftime(results[0], '%m-%d-%Y %H:%M:%S') + "\' and station='" + cln + "';")
-    row = cur.fetchone()
+    row = resp.fetchone()
     if (row[3] == None) or (row[4] == None):
         urllib.urlretrieve(row[1], row[0])
         dispersion_integral(row[0])
@@ -262,7 +260,6 @@ def get_disp_frame(cur, cln, pollutant, results):
         scores.append(round(results[1], 3))
     return scores, dispersions
 
-
 def cdetections(cur, models, lat_lon, date, pollutant, metric, origin):
     items = load_class_weather(cur, date, origin)
     (filelat, filelon, llat, llon) = load_lat_lon(lat_lon)
@@ -272,11 +269,15 @@ def cdetections(cur, models, lat_lon, date, pollutant, metric, origin):
     det_obj.create_detection_map(resize=True)
     det_map = det_obj._det_map
     cl = load_models(det_map, items, models, origin)
-    cur.execute("SELECT station from class group by station order by station;")
-    res = cur.fetchall()
+    resp = cur.execute("SELECT station from class group by station order by station;")
+    res = resp.fetchall()
     res = [i for i in res]
+    print res
+    print cl
     class_name = [str(res[i][0]) for i in cl]
     print class_name
+    import time
+    time.sleep(60)
     for cln in class_name:
         (disp_results, weather_results) = calc_scores(cur, items, cln, pollutant, det_map, origin)
         for w in weather_results:
@@ -317,9 +318,9 @@ def load_lat_lon(lat_lon):
 
 
 def load_weather_data(cur, date, origin):
-    cur.execute("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
+    resp = cur.execute("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
                 date + "' - date)/3600/24 as diff from weather order by diff desc;")
-    res = cur.fetchone()
+    res = resp.fetchone()
     if 'mult' in origin:
         items = cPickle.loads(str(res[2]))
         items = items.reshape(1, 1, items.shape[0], items.shape[
@@ -357,9 +358,9 @@ def load_cluster_date(items, models, origin):
 def calc_station_scores(cur, lat_lon, timestamp, origin, descriptor, pollutant):
     (filelat, filelon, llat, llon) = load_lat_lon(lat_lon)
     results = []
-    cur.execute("select filename,hdfs_path,station,c137_pickle,i131_pickle from cluster where date=TIMESTAMP \'" +
+    res = cur.execute("select filename,hdfs_path,station,c137_pickle,i131_pickle from cluster where date=TIMESTAMP \'" +
                 datetime.datetime.strftime(timestamp, '%m-%d-%Y %H:%M:%S') + "\' and origin='" + origin + "' and descriptor='" + descriptor + "'")
-    for row in cur:
+    for row in res:
         if pollutant == 'C137':
             det_obj = Detection(cPickle.loads(
                 str(row[3])), filelat, filelon, llat, llon)
@@ -383,9 +384,9 @@ def get_top3_stations(cur, top3, timestamp, origin, pollutant):
     stations = []
     scores = []
     dispersions = []
-    cur.execute("select filename,hdfs_path,station,c137,i131 from cluster where date=TIMESTAMP \'" +
+    resp = cur.execute("select filename,hdfs_path,station,c137,i131 from cluster where date=TIMESTAMP \'" +
                 datetime.datetime.strftime(timestamp, '%m-%d-%Y %H:%M:%S') + "\' and origin='" + origin + "'")
-    rows = cur.fetchall()
+    rows = resp.fetchall()
     for row in rows:
         if row[2] in top3_names:
             if (row[3] == None) or (row[4] == None):
@@ -455,9 +456,9 @@ def detections(cur, models, lat_lon, date, pollutant, metric, origin):
 
 
 def get_methods(cur):
-    cur.execute("select origin,html from models;")
+    res = cur.execute("select origin,html from models;")
     origins = []
-    for row in cur:
+    for row in res:
         origin = {}
         origin['html'] = row[1]
         origin['origin'] = row[0]
@@ -468,18 +469,18 @@ def get_methods(cur):
 def get_closest(cur, date, level):
     level = int(level)
     if level == 22:
-        cur.execute("select filename,hdfs_path,wind_dir500,EXTRACT(EPOCH FROM TIMESTAMP '" +
+        resp = cur.execute("select filename,hdfs_path,wind_dir500,EXTRACT(EPOCH FROM TIMESTAMP '" +
                     date + "' - date)/3600/24 as diff from weather group by date\
                     having EXTRACT(EPOCH FROM TIMESTAMP '" + date + "' - date)/3600/24 >= 0 order by diff;")
     elif level == 26:
-        cur.execute("select filename,hdfs_path,wind_dir700,EXTRACT(EPOCH FROM TIMESTAMP '" +
+        resp = cur.execute("select filename,hdfs_path,wind_dir700,EXTRACT(EPOCH FROM TIMESTAMP '" +
                     date + "' - date)/3600/24 as diff from weather group by date\
                     having EXTRACT(EPOCH FROM TIMESTAMP '" + date + "' - date)/3600/24 >= 0 order by diff;")
     elif level == 33:
-        cur.execute("select filename,hdfs_path,wind_dir900,EXTRACT(EPOCH FROM TIMESTAMP '" +
+        resp = cur.execute("select filename,hdfs_path,wind_dir900,EXTRACT(EPOCH FROM TIMESTAMP '" +
                     date + "' - date)/3600/24 as diff from weather group by date\
                     having EXTRACT(EPOCH FROM TIMESTAMP '" + date + "' - date)/3600/24 >= 0 order by diff;")
-    res = cur.fetchone()
+    res = resp.fetchone()
     if res[3] > 5:
         return json.dumps({'error': 'date is out of bounds'})
     if res[2] == None:
