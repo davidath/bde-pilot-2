@@ -60,18 +60,32 @@ function addInteraction() {
     });
 }
 
+function mapClear(){
+  vector.getSource().clear();
+  clearDispersion();
+  clearWindDir();
+  removeSelect();
+  drawStations();
+  drawNetworks();
+  addSelect();
+}
+
+function pointClear(){
+   vector.getSource().clear();
+   clearDispersion();
+   removeSelect();
+   drawStations();
+   drawNetworks();
+   addSelect();
+}
+
 function PaddInteractionMainMap() {
     if (trigger) {
         trigger = false;
         document.getElementById('drawExtentMainMap').style.backgroundColor = 'rgba(185, 106, 139, 0.7)';
         // document.getElementById('map_canvas').style.display = 'block';
         // document.getElementById('map_canvas2').style.display = 'none';
-        vector.getSource().clear();
-        clearDispersion();
-        clearWindDir();
-        drawStations();
         mapFilter.removeInteraction(draw);
-        addSelect()
     } else {
         clearDispersion();
         trigger = true;
@@ -123,6 +137,62 @@ function mapF() {
   //mapFilter.getView().setZoom(currentZoom);
 }
 
+
+function drawCircle(){
+  var value = 'Circle';
+  var geometryFunction = function(coordinates, opt_geometry) {
+      var extent = ol.extent.boundingExtent(coordinates);
+      var geometry = opt_geometry || new ol.geom.Polygon(null);
+      geometry.setCoordinates([[
+        ol.extent.getBottomLeft(extent),
+        ol.extent.getBottomRight(extent),
+        ol.extent.getTopRight(extent),
+        ol.extent.getTopLeft(extent),
+        ol.extent.getBottomLeft(extent)
+      ]]);
+      return geometry;
+  };
+  removeSelect();
+  draw = new ol.interaction.Draw({
+          source: source,
+          type: /** @type {ol.geom.GeometryType} */ (value),
+          geometryFunction: geometryFunction
+  });
+  mapFilter.addInteraction(draw);
+  draw.on('drawend', function(evt) {
+        var extent = evt.feature.getGeometry().getExtent();
+        var style =  new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ffcc33',
+                    width: 1
+                }),
+                image: new ol.style.Circle({
+                    radius: 5,
+                    fill: new ol.style.Fill({
+                        color: '#ff6347'
+                    })
+                })
+        });
+        vector.getSource().forEachFeatureIntersectingExtent(extent,function(feature) {
+          try{
+              var id = feature.getId();
+              var div = document.getElementById(id);
+              div.style.display = 'block';
+              feature.setStyle(style);
+              feature.setId("detection_"+id);
+            }
+            catch(err) {
+              ;
+            }
+        });
+        mapFilter.removeInteraction(draw);
+        addSelect();
+      });
+}
+
 function addInteractionMainMap() {
     if (trigger) {
         trigger = false;
@@ -147,11 +217,11 @@ function addInteractionMainMap() {
         points.setMaxFeatures(501);
         //var currentView = map.getView().getCenter();
         //var currentZoom = map.getView().getZoom();
-        mapFilter = new ol.Map({
-            layers: [baseType, vector, points],
-            target: 'map_canvas2',
-            view: map.getView()
-        });
+        // mapFilter = new ol.Map({
+        //     layers: [baseType, vector, points],
+        //     target: 'map_canvas2',
+        //     view: map.getView()
+        // });
         //mapFilter.getView().setZoom(currentZoom);
 
         var geometryFunction, maxPoints;
@@ -216,34 +286,10 @@ function clearDispersion(){
   });
 }
 
-function getDrawnDispersionId(){
-  var id;
-  mapFilter.getLayers().forEach(function(layer) {
-    try{
-        if (layer.get('title').indexOf('dispersion') !== -1) {
-            var tokens = layer.get('title').split("_");
-            id = parseInt(tokens[1]);
-        }
-      } catch(e) {
-        // pass
-      }
-  });
-  return id;
-}
-
 function clearWindDir(){
   mapFilter.getLayers().forEach(function(layer) {
       if (layer.get('title') == 'wind_direction') {
           mapFilter.removeLayer(layer);
       }
-  });
-}
-
-function clearPopGrid(){
-  vector.getSource().forEachFeature(function(feature) {
-    var id = feature.getId();
-    if (id.indexOf('POP_') !== -1){
-       vector.getSource().removeFeature(feature);
-    }
   });
 }

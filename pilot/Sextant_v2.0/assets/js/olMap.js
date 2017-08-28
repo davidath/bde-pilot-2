@@ -12,7 +12,7 @@
  *  OpenLayers map
  */
 var map;
-var listener_ip = "http://143.233.226.33:8084/";
+var listener_ip = "http://127.0.0.1:5000/";
 /**
  * Shared control among layers for selecting features
  */
@@ -100,6 +100,7 @@ var defaultVectorStyle = new ol.style.Style({
 	    })
 	})
 });
+
 
 /*
  * var iconStyle = new ol.style.Style({
@@ -218,6 +219,7 @@ function initialize() {
 	loadBingsSearchEvents();
 	loadBingsSearchLoadMap();
   drawStations();
+  drawNetworks();
   getMethods();
 	animateLegendPanel();
 	if (!map){
@@ -632,7 +634,6 @@ function initialize() {
     document.getElementsByClassName('timeline-band-1')[0].style.backgroundColor = 'rgba(255,255,255,0)';
     mapF();
     addSelect();
-
 }
 
 function clearOverlayFeatures() {
@@ -956,7 +957,7 @@ function addSelect(){
       filter: function(feature) {
           try{
              var id = feature.getId();
-             if (id.indexOf('POP_') === -1) {
+             if (id.indexOf('NETWORK_') === -1) {
                var s = document.getElementById('stat_info');
                  for(i=0; i<s.childNodes.length; i++) {
                    if (s.childNodes[i].id == id)
@@ -972,7 +973,7 @@ function addSelect(){
   mapFilter.addInteraction(select);
   select.on('select', function(e) {
     var id = e.selected[0].getId();
-    if (id.indexOf('POP_') === -1) {
+    if (id.indexOf('NETWORK_') === -1) {
       var s = document.getElementById('stat_info');
       for(i=0; i<s.childNodes.length; i++) {
       s.childNodes[i].style.display = 'none';
@@ -980,11 +981,85 @@ function addSelect(){
       var div = document.getElementById(e.selected[0].getId());
       div.style.display = 'block';
     }else{
-      var div = document.getElementById('city_uri');
+      var id = e.selected[0].getId();
+      var style = new ol.style.Style({
+      	stroke: new ol.style.Stroke({
+              color: '#ff6347',
+              width: 1
+          }),
+          fill: new ol.style.Fill({
+              color: '#ff6347'
+          }),/*
+          image: new ol.style.Icon({
+          	src: "./assets/images/map-pin-md.png",
+          	scale: 0.1,
+          	crossOrigin: 'anonymous'
+          })*/
+      	image: new ol.style.Circle({
+      	    fill: new ol.style.Fill({
+      	      color: '#ff6347'
+      	    }),
+      	    radius: 5,
+      	    stroke: new ol.style.Stroke({
+      	      color: '#ff6347',
+      	      width: 1
+      	    })
+      	})
+      });
+      var div = document.getElementById(id);
       div.style.display = 'block';
-      div.innerHTML = 'Location name : <a href='+e.selected[0].get('uri')+'>'+e.selected[0].get('name')+'</a>';
+      e.selected[0].setStyle(style);
+      e.selected[0].setId("detection_"+id);
     }
   });
+}
+
+function drawNetworks(){
+  var req = new XMLHttpRequest();
+  req.open("GET", "./data/rnetworks.json", true);
+  req.setRequestHeader('Content-Type', 'plain/text; charset=utf-8');
+  req.onreadystatechange = function() {
+      if (req.readyState == XMLHttpRequest.DONE) {
+          var stations = JSON.parse(req.responseText);
+          inner = '';
+          chart = document.getElementById('net_info');
+          for (var i = 0; i < stations.length; i++) {
+            lnglt = [parseFloat(stations[i]["lon"]),parseFloat(stations[i]["lat"])];
+            var feat = new ol.Feature(new ol.geom.Point(ol.proj.transform(lnglt, 'EPSG:4326', 'EPSG:3857')));
+            feat.setId('NETWORK_'+stations[i]['title'])
+             var style = new ol.style.Style({
+                  	stroke: new ol.style.Stroke({
+                          color: [96, 96, 96, 1],
+                          width: 1
+                      }),
+                      fill: new ol.style.Fill({
+                          color: [96, 96, 96, 0.4]
+                      }),/*
+                      image: new ol.style.Icon({
+                      	src: "./assets/images/map-pin-md.png",
+                      	scale: 0.1,
+                      	crossOrigin: 'anonymous'
+                      })*/
+                  	image: new ol.style.Circle({
+                  	    fill: new ol.style.Fill({
+                  	      color: [96, 96, 96, 0.4]
+                  	    }),
+                  	    radius: 5,
+                  	    stroke: new ol.style.Stroke({
+                  	      color: [96, 96, 96, 1],
+                  	      width: 1
+                  	    })
+                  	})
+            });
+            feat.setStyle(style);
+            var vec = vector.getSource();
+            vec.addFeature(feat);
+            inner += '<div id="'+'NETWORK_'+stations[i]['title']+'" style="display:none;">'+stations[i]['title']+' ('+stations[i]['country']+')<br>Coordinates (latitude,longitude): '+stations[i]['lat']+', '+stations[i]['lon']+'<br><br></div>';
+          }
+          chart.innerHTML = inner;
+      }
+  }
+  req.send();
 }
 
 function removeSelect(){

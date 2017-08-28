@@ -597,7 +597,7 @@ function estimateLocation() {
     drawStations();
     var res = document.getElementById('source_result');
     res.innerHTML = '';
-    if (isPollChecked() && isMethodChecked()) {
+    if (isPollChecked() && isMethodChecked() && !!date) {
         var locs = [];
         vector.getSource().forEachFeature(function(feature) {
             try {
@@ -658,7 +658,7 @@ function estimateLocation() {
             alert('You should mark some detection points before estimating the source\'s location');
         }
     } else {
-        alert('You should choose a weather file, pollutant & clustering method before estimating the source\'s location');
+        alert('You should choose a date, pollutant & clustering method before estimating the source\'s location');
     }
 }
 
