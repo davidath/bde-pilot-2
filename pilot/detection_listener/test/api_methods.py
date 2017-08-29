@@ -457,6 +457,7 @@ def detections(cur, models, lat_lon, date, pollutant, metric, origin):
 
 def get_methods(cur):
     res = cur.execute("select origin,html from models;")
+    res = cur.fetchall()
     origins = []
     for row in res:
         origin = {}
