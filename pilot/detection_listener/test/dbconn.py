@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+import psycopg2
 import json
 import base64
 
@@ -10,12 +10,11 @@ class DBConn(object):
     def __init__(self):
         with open('db_info.json', 'r') as data_file:
             dbpar = json.load(data_file)
-        engine = create_engine('postgresql+psycopg2://' + dbpar['user'] + ':' +
-                 base64.b64decode(dbpar['pass']) + '@' + dbpar['host'] + '/'
-                 + dbpar['dbname'] + '')
-        engine.connect()
-        self.engine = engine
-        instance = engine
+        conn = psycopg2.connect("dbname='" + dbpar['dbname'] + "' user='" + dbpar['user'] +
+                                "' host='" + dbpar['host'] + "' port='" + dbpar['port'] + "'password='" + dpass + "' sslmode=disable")
+        cur = conn.cursor()
+        self.engine = cur
+        instance = cur
 
     def __new__(cls):
         if DBConn.instance is None:
