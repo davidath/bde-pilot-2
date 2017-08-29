@@ -24,6 +24,7 @@ import Queue
 import base64
 import itertools
 from dbconn import DBConn
+from itertools import chain
 
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
