@@ -12,7 +12,7 @@ class DBConn(object):
             dbpar = json.load(data_file)
         engine = create_engine('postgresql+psycopg2://' + dbpar['user'] + ':' +
                  base64.b64decode(dbpar['pass']) + '@' + dbpar['host'] + '/'
-                 + dbpar['dbname'] + '')
+                 + dbpar['dbname'] + '?sslmode=disable')
         engine.connect()
         self.engine = engine
         instance = engine
