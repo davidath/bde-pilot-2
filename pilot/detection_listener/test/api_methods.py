@@ -15,6 +15,7 @@ from geojson import Feature, Point, MultiPoint, MultiLineString, LineString, Fea
 import cPickle
 import gzip
 from sklearn.preprocessing import maxabs_scale, scale, minmax_scale
+from shapely.geometry import shape, Point, Polygon, mapping, MultiPolygon, MultiPoint
 from scipy.ndimage.filters import gaussian_filter
 import scipy.misc
 import json
