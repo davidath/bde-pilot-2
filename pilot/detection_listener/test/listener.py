@@ -28,7 +28,6 @@ clust_obj = None
 exper = None
 conn = None
 cur = None
-# dpass = getpass.getpass()
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 @celery.task(bind=True)
@@ -91,11 +90,9 @@ def getClosestWeather(date, level):
     return api_methods.get_closest(cur, date, level)
 
 from dbconn import DBConn
-conn = DBConn().engine
-cur = conn.cursor()
+cur = DBConn().engine
 models = []
 res = cur.execute("SELECT * from models")
-res = cur.fetchall()
 for row in res:
     urllib.urlretrieve(row[2], str(os.getpid())+row[1])
     print row[2]
