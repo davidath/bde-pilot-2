@@ -293,3 +293,27 @@ function clearWindDir(){
       }
   });
 }
+
+function getDrawnDispersionId(){
+  var id;
+  mapFilter.getLayers().forEach(function(layer) {
+    try{
+        if (layer.get('title').indexOf('dispersion') !== -1) {
+            var tokens = layer.get('title').split("_");
+            id = parseInt(tokens[1]);
+        }
+      } catch(e) {
+        // pass
+      }
+  });
+  return id;
+}
+
+function clearPopGrid(){
+  vector.getSource().forEachFeature(function(feature) {
+    var id = feature.getId();
+    if (id.indexOf('POP_') !== -1){
+       vector.getSource().removeFeature(feature);
+    }
+  });
+}
