@@ -11,7 +11,7 @@ class DBConn(object):
         with open('db_info.json', 'r') as data_file:
             dbpar = json.load(data_file)
         conn = psycopg2.connect("dbname='" + dbpar['dbname'] + "' user='" + dbpar['user'] +
-                                "' host='" + dbpar['host'] + "' port='" + dbpar['port'] + "'password='" + dpass + "' sslmode=disable")
+                                "' host='" + dbpar['host'] + "' port='" + dbpar['port'] + "'password='" + dbpar['pass'] + "' sslmode=disable")
         cur = conn.cursor()
         self.engine = cur
         instance = cur
