@@ -22,7 +22,6 @@ app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
 
-inp = None
 parameters = None
 export_template = None
 clust_obj = None
@@ -94,7 +93,6 @@ def getClosestWeather(date, level):
 from dbconn import DBConn
 conn = DBConn().engine
 cur = conn.cursor()
-inp = 'parameters.json'
 models = []
 res = cur.execute("SELECT * from models")
 res = cur.fetchall()

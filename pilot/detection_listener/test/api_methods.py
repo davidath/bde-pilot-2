@@ -27,6 +27,7 @@ from dbconn import DBConn
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 conn = DBConn().engine
+cur = conn.cursor()
 
 def dispersion_integral(dataset_name):
     dataset = Dataset(APPS_ROOT + '/' + dataset_name, 'r')
