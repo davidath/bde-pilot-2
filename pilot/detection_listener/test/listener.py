@@ -96,6 +96,7 @@ cur = DBConn().engine
 inp = 'parameters.json'
 models = []
 res = cur.execute("SELECT * from models")
+res = cur.fetchall()
 for row in res:
     urllib.urlretrieve(row[2], str(os.getpid())+row[1])
     print row[2]
