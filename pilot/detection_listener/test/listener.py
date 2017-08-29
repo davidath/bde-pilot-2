@@ -28,6 +28,7 @@ clust_obj = None
 exper = None
 conn = None
 cur = None
+cell_pols = None
 APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 @celery.task(bind=True)
@@ -89,13 +90,27 @@ def getMethods():
 def getClosestWeather(date, level):
     return api_methods.get_closest(cur, date, level)
 
+@app.route('/population/', methods=['POST'])
+def population():
+    disp = request.get_json(force=True)
+    task = class_async.apply_async(args=[disp])
+    response = {
+        'id': task.id
+    }
+    return json.dumps(response)
+
+@celery.task(bind=True)
+def class_async(self, disp):
+    return {'current': 100, 'total': 100, 'status': 'Task completed!',
+            'result': api_methods.pop(cell_pols,disp)}
+
 from dbconn import DBConn
 cur = DBConn().engine
 models = []
 res = cur.execute("SELECT * from models")
 for row in res:
     urllib.urlretrieve(row[2], str(os.getpid())+row[1])
-    print row[2]
+    print row[1]
     config = utils.load(str(os.getpid())+row[1])
     m = config.next()
     try:
@@ -109,6 +124,9 @@ for row in res:
     except:
         models.append((row[0], m, c))
     os.system('rm ' + APPS_ROOT + '/' + str(os.getpid())+row[1])
+print 'Loading grid cells.......'
+cell_pols = api_methods.load_gridcells()
+print 'Done.......'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

@@ -933,7 +933,7 @@ function drawStations(){
             feat.setId(stations[i]['name'])
             var style = new ol.style.Style({
                       image: new ol.style.Icon({
-                          src: 'http://test.strabon.di.uoa.gr/Sextant2/assets/images/map-pin-md.png',
+                          src: './assets/images/map-pin-md.png',
                           size: [186, 297],
                           scale: 0.1
                       })

@@ -507,3 +507,77 @@ def get_closest(cur, date, level):
         return json_dir
     else:
         return json.dumps(res[2])
+
+
+def load_gridcells():
+    with open('dispersion_grid.json') as ff:
+         cells = json.load(ff)
+
+    cell_pols = []
+    for cell in cells:
+        points = []
+        points.append(Point(float(cell['bottom_left']['lon']),float(cell['bottom_left']['lat'])))
+        points.append(Point(float(cell['top_left']['lon']),float(cell['top_left']['lat'])))
+        points.append(Point(float(cell['top_right']['lon']),float(cell['top_right']['lat'])))
+        points.append(Point(float(cell['bottom_right']['lon']),float(cell['bottom_right']['lat'])))
+        pol = Polygon([[p.x, p.y] for p in points])
+        cell_pol = {}
+        cell_pol['id'] = cell['id']
+        cell_pol['obj'] = pol
+        cell_pols.append(cell_pol)
+    return cell_pols
+
+def timing(start, end):
+    hours, rem = divmod(end - start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+
+
+from SPARQLWrapper import SPARQLWrapper, JSON
+
+def query(endpoint, cell_ids):
+
+  semagrow = SPARQLWrapper(endpoint)
+
+  for cell_id in cell_ids:
+
+    semagrow.setQuery("""
+    PREFIX  strdf: <http://strdf.di.uoa.gr/ontology#>
+
+    SELECT  ?geoname ?lat ?long ?population
+    WHERE
+        { <http://iit.demokritos.gr/%s> strdf:hasGeometry ?geometry .
+        ?geoname  <http://www.opengis.net/ont/geosparql#asWKT>  ?point ;
+                    <http://www.geonames.org/ontology#featureClass>  <http://www.geonames.org/ontology#P> ;
+                    <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?lat ;
+                    <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?long ;
+                    <http://www.geonames.org/ontology#population>  ?population .
+        FILTER strdf:within(?point, ?geometry)
+        }
+    """%cell_id)
+
+    semagrow.setReturnFormat(JSON)
+
+    results = semagrow.queryAndConvert()
+
+  return results
+
+def pop(cell_pols,disp):
+    start = time.time()
+    disp = json.loads(disp)
+    multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
+    affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
+    affected_ids = list(set(affected_ids))
+    multi_points = []
+    results = query('http://10.0.10.12:9999/SemaGrow/query',affected_ids)
+    points = [(Point(float(res['long']['value']),float(res['lat']['value'])),int(res['population']['value']),res['geoname']['value'],res['name']['value']) for res in results['results']['bindings']]
+    multi_points.append(points)
+    multi_points = list(chain.from_iterable(multi_points))
+    jpols = []
+    timing(start,time.time())
+    start = time.time()
+    for p,point in enumerate(multi_points):
+        jpols.append(dict(type='Feature', properties={"POP":unicode(point[1]),"URI":unicode(point[2]),"NAME":unicode(point[3])}, geometry=mapping(point[0])))
+    end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
+    timing(start,time.time())
+    return json.dumps(end_res)
