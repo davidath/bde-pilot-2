@@ -700,7 +700,7 @@ function checkClassProgress(id){
         }
         else{
           setTimeout(function() {
-                     checkTaskProgress(id);
+                     checkClassProgress(id);
                  }, 2000);
         }
     };

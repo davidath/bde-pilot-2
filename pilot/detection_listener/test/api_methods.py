@@ -219,6 +219,7 @@ def get_disp_frame(cur, cln, pollutant, results):
     if (row[3] == None) or (row[4] == None):
         urllib.urlretrieve(row[1], row[0])
         dispersion_integral(row[0])
+        tr = cur.begin()
         os.system('gdal_translate NETCDF:\\"' + APPS_ROOT + '/' + 'int_' +
                   row[0] + '\\":C137 ' + row[0].split('.')[0] + '_c137.tiff')
         os.system('gdal_translate NETCDF:\\"' + APPS_ROOT + '/' + 'int_' +
@@ -236,7 +237,7 @@ def get_disp_frame(cur, cln, pollutant, results):
                     json.dumps(c137_json) + "\' WHERE filename=\'" + row[0] + "\'")
         cur.execute("UPDATE class SET  i131=\'" +
                     json.dumps(i131_json) + "\' WHERE filename=\'" + row[0] + "\'")
-        conn.commit()
+        tr.commit()
         os.system('rm ' + APPS_ROOT + '/' +
                   row[0].split('.')[0] + '_c137.json')
         os.system('rm ' + APPS_ROOT + '/' +
@@ -392,6 +393,7 @@ def get_top3_stations(cur, top3, timestamp, origin, pollutant):
             if (row[3] == None) or (row[4] == None):
                 urllib.urlretrieve(row[1], row[0])
                 dispersion_integral(row[0])
+                tr = cur.begin()
                 os.system('gdal_translate NETCDF:\\"' + APPS_ROOT + '/' + 'int_' +
                           row[0] + '\\":C137 ' + row[0].split('.')[0] + '_c137.tiff')
                 os.system('gdal_translate NETCDF:\\"' + APPS_ROOT + '/' + 'int_' +
@@ -409,7 +411,7 @@ def get_top3_stations(cur, top3, timestamp, origin, pollutant):
                             json.dumps(c137_json) + "\' WHERE filename=\'" + row[0] + "\'")
                 cur.execute("UPDATE cluster SET  i131=\'" +
                             json.dumps(i131_json) + "\' WHERE filename=\'" + row[0] + "\'")
-                conn.commit()
+                tr.commit()
                 os.system('rm ' + APPS_ROOT + '/' +
                           row[0].split('.')[0] + '_c137.json')
                 os.system('rm ' + APPS_ROOT + '/' +
@@ -488,17 +490,20 @@ def get_closest(cur, date, level):
         json_dir = calc_winddir(res[0], level)
         os.system('rm ' + APPS_ROOT + '/' + res[0])
         if level == 22:
+            tr = cur.begin()
             cur.execute("UPDATE weather SET  wind_dir500=\'" +
                         json_dir + "\' WHERE filename=\'" + res[0] + "\'")
-            conn.commit()
+            tr.commit()
         elif level == 26:
+            tr = cur.begin()
             cur.execute("UPDATE weather SET  wind_dir700=\'" +
                         json_dir + "\' WHERE filename=\'" + res[0] + "\'")
-            conn.commit()
+            tr.commit()
         elif level == 33:
+            tr = cur.begin()
             cur.execute("UPDATE weather SET  wind_dir900=\'" +
                         json_dir + "\' WHERE filename=\'" + res[0] + "\'")
-            conn.commit()
+            tr.commit()
         return json_dir
     else:
         return json.dumps(res[2])
