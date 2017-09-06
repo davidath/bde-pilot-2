@@ -311,9 +311,12 @@ function getDrawnDispersionId(){
 
 function clearPopGrid(){
   vector.getSource().forEachFeature(function(feature) {
-    var id = feature.getId();
-    if (id.indexOf('POP_') !== -1){
-       vector.getSource().removeFeature(feature);
-    }
-  });
+    try{
+        var id = feature.getId();
+        if (id.indexOf('POP_') !== -1){
+           vector.getSource().removeFeature(feature);
+        }
+      }
+    catch(err){ ; }
+    });
 }

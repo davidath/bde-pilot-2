@@ -102,7 +102,7 @@ def population():
 @celery.task(bind=True)
 def class_async(self, disp):
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
-            'result': api_methods.pop(cell_pols,disp)}
+            'result': api_methods.single_pop(cell_pols,disp)}
 
 from dbconn import DBConn
 cur = DBConn().engine

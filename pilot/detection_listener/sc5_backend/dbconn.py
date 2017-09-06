@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 import json
 import base64
+from sqlalchemy.orm import sessionmaker
 
 class DBConn(object):
 
@@ -21,3 +22,8 @@ class DBConn(object):
         if DBConn.instance is None:
             DBConn.instance = object.__new__(cls)
         return DBConn.instance
+
+    def safequery(self, sql):
+        maker = sessionmaker(bind=self.engine, autocommit=True)
+        session = maker()
+        return session.execute(sql)

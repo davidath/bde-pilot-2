@@ -128,7 +128,7 @@ def calc_winddir(dataset_name, level):
 
 
 def load_class_weather(cur, date, origin):
-    resp = cur.execute("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
+    resp = DBConn().safequery("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
                 date + "' - date)/3600/24 as diff from weather order by diff desc;")
     row = resp.fetchone()
     if 'mult' in origin:
@@ -178,7 +178,7 @@ def worker(batch,q,pollutant,det_map):
     q.put(disp_results)
 
 def calc_scores(cur, items, cln, pollutant,det_map,origin):
-    resp = cur.execute(
+    resp = DBConn().safequery(
         "SELECT date,hdfs_path,c137_pickle,i131_pickle from class where station=\'" + cln + "\';")
     res = resp.fetchall()
     batch_size = len(res) / 4
@@ -194,7 +194,7 @@ def calc_scores(cur, items, cln, pollutant,det_map,origin):
     disp_results = list(itertools.chain.from_iterable(disp_results))
     print len(disp_results)
     disp_results = sorted(disp_results, key=lambda k: k[1], reverse=True)
-    resp = cur.execute("SELECT date,GHT from weather;")
+    resp = DBConn().safequery("SELECT date,GHT from weather;")
     res = resp.fetchall()
     weather_results = []
     for row in res:
@@ -215,13 +215,13 @@ def get_disp_frame(cur, cln, pollutant, results):
     dispersions = []
     scores = []
     print results[0]
-    resp = cur.execute("select filename,hdfs_path,date,c137,i131 from class where  date=TIMESTAMP \'" +
+    resp = DBConn().safequery("select filename,hdfs_path,date,c137,i131 from class where  date=TIMESTAMP \'" +
                 datetime.datetime.strftime(results[0], '%m-%d-%Y %H:%M:%S') + "\' and station='" + cln + "';")
     row = resp.fetchone()
     if (row[3] == None) or (row[4] == None):
         urllib.urlretrieve(row[1], row[0])
         dispersion_integral(row[0])
-        tr = cur.begin()
+
         os.system('gdal_translate NETCDF:\\"' + APPS_ROOT + '/' + 'int_' +
                   row[0] + '\\":C137 ' + row[0].split('.')[0] + '_c137.tiff')
         os.system('gdal_translate NETCDF:\\"' + APPS_ROOT + '/' + 'int_' +
@@ -235,11 +235,11 @@ def get_disp_frame(cur, cln, pollutant, results):
             c137_json = json.load(c137)
         with open(APPS_ROOT + '/' + row[0].split('.')[0] + '_i131.json', 'r') as i131:
             i131_json = json.load(i131)
-        cur.execute("UPDATE class SET  c137=\'" +
+        DBConn().safequery("UPDATE class SET  c137=\'" +
                     json.dumps(c137_json) + "\' WHERE filename=\'" + row[0] + "\'")
-        cur.execute("UPDATE class SET  i131=\'" +
+        DBConn().safequery("UPDATE class SET  i131=\'" +
                     json.dumps(i131_json) + "\' WHERE filename=\'" + row[0] + "\'")
-        tr.commit()
+
         os.system('rm ' + APPS_ROOT + '/' +
                   row[0].split('.')[0] + '_c137.json')
         os.system('rm ' + APPS_ROOT + '/' +
@@ -272,15 +272,13 @@ def cdetections(cur, models, lat_lon, date, pollutant, metric, origin):
     det_obj.create_detection_map(resize=True)
     det_map = det_obj._det_map
     cl = load_models(det_map, items, models, origin)
-    resp = cur.execute("SELECT station from class group by station order by station;")
+    resp = DBConn().safequery("SELECT station from class group by station order by station;")
     res = resp.fetchall()
     res = [i for i in res]
     print res
     print cl
     class_name = [str(res[i][0]) for i in cl]
     print class_name
-    import time
-    time.sleep(60)
     for cln in class_name:
         (disp_results, weather_results) = calc_scores(cur, items, cln, pollutant, det_map, origin)
         for w in weather_results:
@@ -321,7 +319,7 @@ def load_lat_lon(lat_lon):
 
 
 def load_weather_data(cur, date, origin):
-    resp = cur.execute("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
+    resp = DBConn().safequery("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
                 date + "' - date)/3600/24 as diff from weather order by diff desc;")
     res = resp.fetchone()
     if 'mult' in origin:
@@ -361,7 +359,7 @@ def load_cluster_date(items, models, origin):
 def calc_station_scores(cur, lat_lon, timestamp, origin, descriptor, pollutant):
     (filelat, filelon, llat, llon) = load_lat_lon(lat_lon)
     results = []
-    res = cur.execute("select filename,hdfs_path,station,c137_pickle,i131_pickle from cluster where date=TIMESTAMP \'" +
+    res = DBConn().safequery("select filename,hdfs_path,station,c137_pickle,i131_pickle from cluster where date=TIMESTAMP \'" +
                 datetime.datetime.strftime(timestamp, '%m-%d-%Y %H:%M:%S') + "\' and origin='" + origin + "' and descriptor='" + descriptor + "'")
     for row in res:
         if pollutant == 'C137':
@@ -387,7 +385,7 @@ def get_top3_stations(cur, top3, timestamp, origin, pollutant):
     stations = []
     scores = []
     dispersions = []
-    resp = cur.execute("select filename,hdfs_path,station,c137,i131 from cluster where date=TIMESTAMP \'" +
+    resp = DBConn().safequery("select filename,hdfs_path,station,c137,i131 from cluster where date=TIMESTAMP \'" +
                 datetime.datetime.strftime(timestamp, '%m-%d-%Y %H:%M:%S') + "\' and origin='" + origin + "'")
     rows = resp.fetchall()
     for row in rows:
@@ -395,7 +393,6 @@ def get_top3_stations(cur, top3, timestamp, origin, pollutant):
             if (row[3] == None) or (row[4] == None):
                 urllib.urlretrieve(row[1], row[0])
                 dispersion_integral(row[0])
-                tr = cur.begin()
                 os.system('gdal_translate NETCDF:\\"' + APPS_ROOT + '/' + 'int_' +
                           row[0] + '\\":C137 ' + row[0].split('.')[0] + '_c137.tiff')
                 os.system('gdal_translate NETCDF:\\"' + APPS_ROOT + '/' + 'int_' +
@@ -409,11 +406,11 @@ def get_top3_stations(cur, top3, timestamp, origin, pollutant):
                     c137_json = json.load(c137)
                 with open(row[0].split('.')[0] + '_i131.json', 'r') as i131:
                     i131_json = json.load(i131)
-                cur.execute("UPDATE cluster SET  c137=\'" +
+                DBConn().safequery("UPDATE cluster SET  c137=\'" +
                             json.dumps(c137_json) + "\' WHERE filename=\'" + row[0] + "\'")
-                cur.execute("UPDATE cluster SET  i131=\'" +
+                DBConn().safequery("UPDATE cluster SET  i131=\'" +
                             json.dumps(i131_json) + "\' WHERE filename=\'" + row[0] + "\'")
-                tr.commit()
+
                 os.system('rm ' + APPS_ROOT + '/' +
                           row[0].split('.')[0] + '_c137.json')
                 os.system('rm ' + APPS_ROOT + '/' +
@@ -460,7 +457,7 @@ def detections(cur, models, lat_lon, date, pollutant, metric, origin):
 
 
 def get_methods(cur):
-    res = cur.execute("select origin,html from models;")
+    res = DBConn().safequery("select origin,html from models;")
     origins = []
     for row in res:
         origin = {}
@@ -473,15 +470,15 @@ def get_methods(cur):
 def get_closest(cur, date, level):
     level = int(level)
     if level == 22:
-        resp = cur.execute("select filename,hdfs_path,wind_dir500,EXTRACT(EPOCH FROM TIMESTAMP '" +
+        resp = DBConn().safequery("select filename,hdfs_path,wind_dir500,EXTRACT(EPOCH FROM TIMESTAMP '" +
                     date + "' - date)/3600/24 as diff from weather group by date\
                     having EXTRACT(EPOCH FROM TIMESTAMP '" + date + "' - date)/3600/24 >= 0 order by diff;")
     elif level == 26:
-        resp = cur.execute("select filename,hdfs_path,wind_dir700,EXTRACT(EPOCH FROM TIMESTAMP '" +
+        resp = DBConn().safequery("select filename,hdfs_path,wind_dir700,EXTRACT(EPOCH FROM TIMESTAMP '" +
                     date + "' - date)/3600/24 as diff from weather group by date\
                     having EXTRACT(EPOCH FROM TIMESTAMP '" + date + "' - date)/3600/24 >= 0 order by diff;")
     elif level == 33:
-        resp = cur.execute("select filename,hdfs_path,wind_dir900,EXTRACT(EPOCH FROM TIMESTAMP '" +
+        resp = DBConn().safequery("select filename,hdfs_path,wind_dir900,EXTRACT(EPOCH FROM TIMESTAMP '" +
                     date + "' - date)/3600/24 as diff from weather group by date\
                     having EXTRACT(EPOCH FROM TIMESTAMP '" + date + "' - date)/3600/24 >= 0 order by diff;")
     res = resp.fetchone()
@@ -492,20 +489,20 @@ def get_closest(cur, date, level):
         json_dir = calc_winddir(res[0], level)
         os.system('rm ' + APPS_ROOT + '/' + res[0])
         if level == 22:
-            tr = cur.begin()
-            cur.execute("UPDATE weather SET  wind_dir500=\'" +
+
+            DBConn().safequery("UPDATE weather SET  wind_dir500=\'" +
                         json_dir + "\' WHERE filename=\'" + res[0] + "\'")
-            tr.commit()
+
         elif level == 26:
-            tr = cur.begin()
-            cur.execute("UPDATE weather SET  wind_dir700=\'" +
+
+            DBConn().safequery("UPDATE weather SET  wind_dir700=\'" +
                         json_dir + "\' WHERE filename=\'" + res[0] + "\'")
-            tr.commit()
+
         elif level == 33:
-            tr = cur.begin()
-            cur.execute("UPDATE weather SET  wind_dir900=\'" +
+
+            DBConn().safequery("UPDATE weather SET  wind_dir900=\'" +
                         json_dir + "\' WHERE filename=\'" + res[0] + "\'")
-            tr.commit()
+
         return json_dir
     else:
         return json.dumps(res[2])
@@ -537,32 +534,83 @@ def timing(start, end):
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-def query(endpoint, cell_ids):
+def single_query(semagrow, cell_id):
+
+  semagrow.setQuery("""
+  PREFIX  strdf: <http://strdf.di.uoa.gr/ontology#>
+
+  SELECT  ?geoname ?lat ?long ?name ?population
+  WHERE
+    { <http://iit.demokritos.gr/%s> strdf:hasGeometry ?geometry .
+      ?geoname  <http://www.opengis.net/ont/geosparql#asWKT>  ?point ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?lat ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?long ;
+                <http://www.geonames.org/ontology#name> ?name ;
+                <http://www.geonames.org/ontology#population>  ?population .
+      FILTER strdf:within(?point, ?geometry)
+    }
+  """%cell_id)
+
+  semagrow.setReturnFormat(JSON)
+
+  results = semagrow.queryAndConvert()
+
+  return results
+
+def query(endpoint, cell_id):
+  values = ""
+  for id in cell_id:
+    values = values + "<http://iit.demokritos.gr/"+id+"> "
 
   semagrow = SPARQLWrapper(endpoint)
 
-  for cell_id in cell_ids:
+  semagrow.setQuery("""
+  PREFIX  strdf: <http://strdf.di.uoa.gr/ontology#>
 
-    semagrow.setQuery("""
-    PREFIX  strdf: <http://strdf.di.uoa.gr/ontology#>
+  SELECT  ?geoname ?lat ?long ?name ?population
+  WHERE
+    { ?cellid strdf:hasGeometry ?geometry .
+      ?geoname  <http://www.opengis.net/ont/geosparql#asWKT>  ?point ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?lat ;
+                <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?long ;
+                <http://www.geonames.org/ontology#name> ?name ;
+                <http://www.geonames.org/ontology#population>  ?population .
+      VALUES ?cellid { %s }
+      FILTER strdf:within(?point, ?geometry)
+    }
+  """%values)
 
-    SELECT  ?geoname ?lat ?long ?population
-    WHERE
-        { <http://iit.demokritos.gr/%s> strdf:hasGeometry ?geometry .
-        ?geoname  <http://www.opengis.net/ont/geosparql#asWKT>  ?point ;
-                    <http://www.geonames.org/ontology#featureClass>  <http://www.geonames.org/ontology#P> ;
-                    <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?lat ;
-                    <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?long ;
-                    <http://www.geonames.org/ontology#population>  ?population .
-        FILTER strdf:within(?point, ?geometry)
-        }
-    """%cell_id)
+  semagrow.setReturnFormat(JSON)
 
-    semagrow.setReturnFormat(JSON)
-
-    results = semagrow.queryAndConvert()
+  results = semagrow.queryAndConvert()
 
   return results
+
+
+def single_pop(cell_pols,disp):
+    start = time.time()
+    disp = json.loads(disp)
+    multi = MultiPolygon([shape(pol['geometry']) for pol in disp['features']])
+    affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
+    affected_ids = list(set(affected_ids))
+    multi_points = []
+    for id in affected_ids:
+        try:
+            semagrow = SPARQLWrapper('http://10.0.10.12:9999/SemaGrow/query')
+            results = single_query(semagrow,id)
+            points = [(Point(float(res['long']['value']),float(res['lat']['value'])),int(res['population']['value']),res['geoname']['value'],res['name']['value']) for res in results['results']['bindings']]
+            multi_points.append(points)
+        except:
+            pass
+    multi_points = list(chain.from_iterable(multi_points))
+    jpols = []
+    timing(start,time.time())
+    start = time.time()
+    for p,point in enumerate(multi_points):
+        jpols.append(dict(type='Feature', properties={"POP":unicode(point[1]),"URI":unicode(point[2]),"NAME":unicode(point[3])}, geometry=mapping(point[0])))
+    end_res = dict(type='FeatureCollection', crs={ "type": "name", "properties": { "name":"urn:ogc:def:crs:OGC:1.3:CRS84" }},features=jpols)
+    timing(start,time.time())
+    return json.dumps(end_res)
 
 def pop(cell_pols,disp):
     start = time.time()
