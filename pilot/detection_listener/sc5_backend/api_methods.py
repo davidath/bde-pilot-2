@@ -557,12 +557,10 @@ def single_query(semagrow, cell_id):
 
   return results
 
-def query(endpoint, cell_id):
+def query(semagrow, cell_id):
   values = ""
   for id in cell_id:
-    values = values + "<http://iit.demokritos.gr/"+id+"> "
-
-  semagrow = SPARQLWrapper(endpoint)
+    values = values + "<http://iit.demokritos.gr/"+str(id)+"> "
 
   semagrow.setQuery("""
   PREFIX  strdf: <http://strdf.di.uoa.gr/ontology#>
@@ -619,9 +617,12 @@ def pop(cell_pols,disp):
     affected_ids = [pol['id'] for pol in cell_pols if multi.intersects(pol['obj'])]
     affected_ids = list(set(affected_ids))
     multi_points = []
-    results = query('http://10.0.10.12:9999/SemaGrow/query',affected_ids)
-    points = [(Point(float(res['long']['value']),float(res['lat']['value'])),int(res['population']['value']),res['geoname']['value'],res['name']['value']) for res in results['results']['bindings']]
-    multi_points.append(points)
+    batch_size = 100
+    semagrow = SPARQLWrapper('http://10.0.10.12:9999/SemaGrow/query')
+    for batch in range(0,len(affected_ids),batch_size):
+        results = query(semagrow,affected_ids[batch:batch+batch_size])
+        points = [(Point(float(res['long']['value']),float(res['lat']['value'])),int(res['population']['value']),res['geoname']['value'],res['name']['value']) for res in results['results']['bindings']]
+        multi_points.append(points)
     multi_points = list(chain.from_iterable(multi_points))
     jpols = []
     timing(start,time.time())
