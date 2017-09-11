@@ -19,3 +19,4 @@ EXPOSE $PORT
 EXPOSE $PORT2
 
 CMD ["/bin/bash", "/sextant.sh"]
+CMD ["/bin/bash", "/sc5.sh"]
