@@ -1,9 +1,9 @@
 """
    SCRIPT INFO
    ---------------------------------------------------------------------------
-   This script acts a controller for the backend of the SC5 #2 and #3 pilot.
-   It controls the flow of the UI by calling the appropiate functions and
-   returning their respective results.
+   This script acts a controller for the SC5 #2 and #3 pilot. It controls the
+   flow of the UI by calling the appropiate functions and returning their
+   respective results.
    ---------------------------------------------------------------------------
 """
 
@@ -125,7 +125,7 @@ def class_async(self, disp):
             'result': api_methods.pop(cell_pols,disp)}
 
 # Pseudo main, these lines are global due to the fact that this script returns
-# using gunicorn, when relocating these lines to a function the models do not
+# using Gunicorn, when relocating these lines to a function the models do not
 # load propely
 from dbconn import DBConn
 cur = DBConn().engine
@@ -151,5 +151,7 @@ print 'Loading grid cells.......'
 cell_pols = api_methods.load_gridcells()
 print 'Done.......'
 
+# Running and binding port/host. Only usable if listener script runs with the
+# default WSGI Server and not with Gunicorn
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

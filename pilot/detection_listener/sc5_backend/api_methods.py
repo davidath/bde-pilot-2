@@ -1,11 +1,16 @@
-from netcdf_subset import netCDF_subset
+"""
+   CLASS INFO
+   ---------------------------------------------------------------------------
+   This class acts as the model (from MVC framework) for the SC5 #2 and #3 pilot.
+   ---------------------------------------------------------------------------
+"""
+
 from Dataset_transformations import Dataset_transformations
 from Detection import Detection
 import dataset_utils as utils
 import numpy as np
 from netCDF4 import Dataset
 import urllib
-import psycopg2
 import getpass
 import os
 import math
@@ -13,15 +18,12 @@ import datetime
 import time
 from geojson import Feature, Point, MultiPoint, MultiLineString, LineString, FeatureCollection
 import cPickle
-import gzip
 from sklearn.preprocessing import maxabs_scale, scale, minmax_scale
 from shapely.geometry import shape, Point, Polygon, mapping, MultiPolygon, MultiPoint
-from scipy.ndimage.filters import gaussian_filter
 import scipy.misc
 import json
 import threading
 import Queue
-import base64
 import itertools
 from dbconn import DBConn
 from itertools import chain
@@ -30,17 +32,32 @@ APPS_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 conn = DBConn().engine
 
+# TODO: Update function with gdal python API
+
+# This Function returns a dispersion that consist of 72 hours as a single frame.
+# For this purpose we calculate the integral of a dispersion.
 def dispersion_integral(dataset_name):
+    # Load NetCDF file from local path
     dataset = Dataset(APPS_ROOT + '/' + dataset_name, 'r')
     dsout = Dataset(APPS_ROOT + '/' + 'int_' + dataset_name,
                     'w', format='NETCDF3_CLASSIC')
+    # Retrieve both pollutants
     c137 = dataset.variables['C137'][:]
     i131 = dataset.variables['I131'][:]
+    # Calculate their sum
     c137 = np.sum(c137, axis=0).reshape(501, 501)
     i131 = np.sum(i131, axis=0).reshape(501, 501)
+    # Write the disperion integrals on disk in NetCDF format.
+    # We need the dispersion integrals in NetCDF format due to the fact that we
+    # use integrals for visualization. In order to visualize geographical information
+    # in our application we use a set of tools accesible through the OS, like
+    # gdal_translate
+
+    # Copy attributes from original file
     for gattr in dataset.ncattrs():
         gvalue = dataset.getncattr(gattr)
         dsout.setncattr(gattr, gvalue)
+    # Copy dimensions from original file
     for dname, dim in dataset.dimensions.iteritems():
         if dname == 'time':
             dsout.createDimension(dname, 1 if not dim.isunlimited() else None)
@@ -48,6 +65,8 @@ def dispersion_integral(dataset_name):
             dsout.createDimension(dname, len(
                 dim) if not dim.isunlimited() else None)
     print dsout.dimensions
+    # Copy every other variable from the original file except from
+    # the pollutant variables
     for v_name, varin in dataset.variables.iteritems():
         if v_name == 'C137':
             outVar = dsout.createVariable(
@@ -68,32 +87,48 @@ def dispersion_integral(dataset_name):
                 outVar.setncatts({k: varin.getncattr(k)
                                   for k in varin.ncattrs()})
                 outVar[:] = varin[:]
+            # Catch exception on time variable
             except:
                 outVar[:] = varin[0]
+    # Finish writing process
     dsout.close()
 
-
+# This function calculates the wind direction from a NetCDF file.
+# The wind direction is calculated and visualized by computing the dot product
+# of the U wind direction and the V wind direction. After calculating the dot product
+# we create arrows that represent the wind direction for the whole grid.
 def calc_winddir(dataset_name, level):
+    # Load NetCDF file from local file
     dataset = Dataset(APPS_ROOT + '/' + dataset_name, 'r')
+    # Retrieve U Wind direction
     u = dataset.variables['UU'][:, level, :, range(0, 64)].reshape(13, 4096)
+    # Retrieve V Wind direction
     v = dataset.variables['VV'][:, level, range(0, 64), :].reshape(13, 4096)
+    # Retrieve Latitude and Longitude values
     lat = dataset.variables['XLAT_M'][0, :, :].flatten()
     lon = dataset.variables['XLONG_M'][0, :, :].flatten()
+    # Calculate sum of all time frames for U and V wind direction
     u = np.sum(u, axis=0)
     v = np.sum(v, axis=0)
+    # Turn UV into [0,1] vector
     uv = np.vstack((u, v))
     uv = np.divide(uv, np.max(uv))
+    # Create 2 Points for each (lat,lon) pair in the grid
+    # Point1 with coordinates of (latN,lonN)
+    # Point2 with coordinates of (latN+UV[N],lonN+UV[N])
     x1 = lon
     y1 = lat
     x1 = [float(i) for i in lon]
     y1 = [float(i) for i in lat]
     x2 = []
     y2 = []
-    arr = []
+    # Calculate Point2
     for i in range(0, uv.shape[1]):
         x2.append(float(x1[i] + uv[0][i]))
         y2.append(float(y1[i] + uv[1][i]))
+    # Placeholder for every pair of points
     arr = []
+    # Calculate
     for i in range(0, uv.shape[1]):
         L1 = math.sqrt((x1[i] - x2[i]) * (x1[i] - x2[i]) +
                        (y2[i] - y1[i]) * (y2[i] - y1[i]))
