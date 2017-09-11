@@ -124,31 +124,32 @@ def class_async(self, disp):
     return {'current': 100, 'total': 100, 'status': 'Task completed!',
             'result': api_methods.pop(cell_pols,disp)}
 
-def main():
-    from dbconn import DBConn
-    cur = DBConn().engine
-    models = []
-    res = cur.execute("SELECT * from models")
-    for row in res:
-        urllib.urlretrieve(row[2], str(os.getpid())+row[1])
-        print row[1]
-        config = utils.load(str(os.getpid())+row[1])
-        m = config.next()
-        try:
-            c = config.next()
-        except:
-            c = m
-        current = [mod[1] for mod in models]
-        try:
-            pos = current.index(m)
-            models.append((row[0], models[pos][1], c))
-        except:
-            models.append((row[0], m, c))
-        os.system('rm ' + APPS_ROOT + '/' + str(os.getpid())+row[1])
-    print 'Loading grid cells.......'
-    cell_pols = api_methods.load_gridcells()
-    print 'Done.......'
+# Pseudo main, these lines are global due to the fact that this script returns
+# using gunicorn, when relocating these lines to a function the models do not
+# load propely
+from dbconn import DBConn
+cur = DBConn().engine
+models = []
+res = cur.execute("SELECT * from models")
+for row in res:
+    urllib.urlretrieve(row[2], str(os.getpid())+row[1])
+    print row[1]
+    config = utils.load(str(os.getpid())+row[1])
+    m = config.next()
+    try:
+        c = config.next()
+    except:
+        c = m
+    current = [mod[1] for mod in models]
+    try:
+        pos = current.index(m)
+        models.append((row[0], models[pos][1], c))
+    except:
+        models.append((row[0], m, c))
+    os.system('rm ' + APPS_ROOT + '/' + str(os.getpid())+row[1])
+print 'Loading grid cells.......'
+cell_pols = api_methods.load_gridcells()
+print 'Done.......'
 
 if __name__ == '__main__':
-    main()
     app.run(host='0.0.0.0')
