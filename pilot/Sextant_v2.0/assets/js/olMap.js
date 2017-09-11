@@ -972,51 +972,53 @@ function addSelect(){
   });
   mapFilter.addInteraction(select);
   select.on('select', function(e) {
-    var id = e.selected[0].getId();
-    if (id.indexOf('POP_') !== -1) {
-      var div = document.getElementById('city_uri');
-      div.style.display = 'block';
-      div.innerHTML = 'Location name : <a href='+e.selected[0].get('uri')+'>'+e.selected[0].get('name')+'</a>';
-    }
-    else if (id.indexOf('NETWORK_') !== -1){
+    try{
       var id = e.selected[0].getId();
-      var style = new ol.style.Style({
-      	stroke: new ol.style.Stroke({
-              color: '#ff6347',
-              width: 1
-          }),
-          fill: new ol.style.Fill({
-              color: '#ff6347'
-          }),/*
-          image: new ol.style.Icon({
-          	src: "./assets/images/map-pin-md.png",
-          	scale: 0.1,
-          	crossOrigin: 'anonymous'
-          })*/
-      	image: new ol.style.Circle({
-      	    fill: new ol.style.Fill({
-      	      color: '#ff6347'
-      	    }),
-      	    radius: 5,
-      	    stroke: new ol.style.Stroke({
-      	      color: '#ff6347',
-      	      width: 1
-      	    })
-      	})
-      });
-      var div = document.getElementById(id);
-      div.style.display = 'block';
-      e.selected[0].setStyle(style);
-      e.selected[0].setId("detection_"+id);
-    }
-    else {
-      var s = document.getElementById('stat_info');
-      for(i=0; i<s.childNodes.length; i++) {
-      s.childNodes[i].style.display = 'none';
+      if (id.indexOf('POP_') !== -1) {
+        var div = document.getElementById('city_uri');
+        div.style.display = 'block';
+        div.innerHTML = 'Location name : <a href='+e.selected[0].get('uri')+'>'+e.selected[0].get('name')+'</a>';
       }
-      var div = document.getElementById(e.selected[0].getId());
-      div.style.display = 'block';
-    }
+      else if (id.indexOf('NETWORK_') !== -1){
+        var id = e.selected[0].getId();
+        var style = new ol.style.Style({
+        	stroke: new ol.style.Stroke({
+                color: '#ff6347',
+                width: 1
+            }),
+            fill: new ol.style.Fill({
+                color: '#ff6347'
+            }),/*
+            image: new ol.style.Icon({
+            	src: "./assets/images/map-pin-md.png",
+            	scale: 0.1,
+            	crossOrigin: 'anonymous'
+            })*/
+        	image: new ol.style.Circle({
+        	    fill: new ol.style.Fill({
+        	      color: '#ff6347'
+        	    }),
+        	    radius: 5,
+        	    stroke: new ol.style.Stroke({
+        	      color: '#ff6347',
+        	      width: 1
+        	    })
+        	})
+        });
+        var div = document.getElementById(id);
+        div.style.display = 'block';
+        e.selected[0].setStyle(style);
+        e.selected[0].setId("detection_"+id);
+      }
+      else {
+        var s = document.getElementById('stat_info');
+        for(i=0; i<s.childNodes.length; i++) {
+        s.childNodes[i].style.display = 'none';
+        }
+        var div = document.getElementById(e.selected[0].getId());
+        div.style.display = 'block';
+      }
+    } catch(err) { ; }
   });
 }
 
