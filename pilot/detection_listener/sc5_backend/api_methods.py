@@ -128,7 +128,8 @@ def calc_winddir(dataset_name, level):
         y2.append(float(y1[i] + uv[1][i]))
     # Placeholder for every pair of points
     arr = []
-    # Calculate
+    # Calculate arrow between Point1 and Point2 basd on
+    # https://math.stackexchange.com/questions/1314006/drawing-an-arrow
     for i in range(0, uv.shape[1]):
         L1 = math.sqrt((x1[i] - x2[i]) * (x1[i] - x2[i]) +
                        (y2[i] - y1[i]) * (y2[i] - y1[i]))
@@ -145,6 +146,7 @@ def calc_winddir(dataset_name, level):
         b = (x2[i], y2[i])
         c = (x3, y3)
         d = (x4, y4)
+        # Add each point to placeholder array
         temp = []
         temp.append(a)
         temp.append(b)
@@ -161,17 +163,26 @@ def calc_winddir(dataset_name, level):
     dataset.close()
     return json.dumps(feature)
 
-
+# This function retrieves the closest weather file to a date given by the user.
+# The weather is retrieved from POSTGRES in the form of pickled object.
+# Weather files are used to exctact the GHT variable that was used in our
+# experiments.
 def load_class_weather(cur, date, origin):
+    # Safe query is used due to multiple workers accessing the same database
+    # and connection.
     resp = DBConn().safequery("select filename,hdfs_path,GHT,EXTRACT(EPOCH FROM TIMESTAMP '" +
                 date + "' - date)/3600/24 as diff from weather order by diff desc;")
     row = resp.fetchone()
+    # If model has mult in its title then we need multiple levels (500,700,900 hPa)
+    # of the GHT variable.
     if 'mult' in origin:
+        # Load weather as a pickled object and scale the variable
         items = cPickle.loads(str(row[2]))
         items = items.reshape(items.shape[0], -1)
         items = minmax_scale(items.sum(axis=0))
     else:
         items = cPickle.loads(str(row[2]))
+        # GHT 700hPa
         items = items[:, 1, :, :]
         items = minmax_scale(items.sum(axis=0))
     return items
