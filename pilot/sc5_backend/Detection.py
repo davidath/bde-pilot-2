@@ -82,7 +82,7 @@ class Detection(object):
     def cosine(self):
         # Calculate cosine distance
         det = self._det_map
-        conc_shape = conc.shape
+        conc_shape = self._conc.shape
         conc = maxabs_scale(self._conc.flatten(),axis=1)
         conc = conc.reshape(conc_shape)
         return scipy.spatial.distance.cosine(conc.flatten(),det.flatten())
