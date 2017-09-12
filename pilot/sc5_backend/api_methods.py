@@ -234,7 +234,9 @@ def worker(batch,q,pollutant,det_map):
             det = cPickle.loads(str(row[3]))
         # Preprocessing of dispersion
         det = scipy.misc.imresize(det, (167, 167))
-        det = maxabs_scale(det)
+        det_shape = det.shape
+        det = maxabs_scale(det.flatten(),axis=1)
+        det = det.reshape(det_shape)
         # Get distance between real dispersion and detection points
         disp_results.append(
             (row[0], 1 - scipy.spatial.distance.cosine(det.flatten(), det_map.flatten())))

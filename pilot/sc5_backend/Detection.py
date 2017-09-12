@@ -54,7 +54,9 @@ class Detection(object):
         if resize:
             det_map = scipy.misc.imresize(det_map, (RESIZE_DIM, RESIZE_DIM))
         # Scale
-        det_map = maxabs_scale(det_map)
+        det_map_shape = det_map.shape
+        det_map = maxabs_scale(det_map.flatten(),axis=1)
+        det_map = det_map.reshape(det_map_shape)
         self._det_map = det_map
 
     def calc(self):
@@ -80,5 +82,7 @@ class Detection(object):
     def cosine(self):
         # Calculate cosine distance
         det = self._det_map
-        conc = maxabs_scale(self._conc)
+        conc_shape = conc.shape
+        conc = maxabs_scale(self._conc.flatten(),axis=1)
+        conc = conc.reshape(conc_shape)
         return scipy.spatial.distance.cosine(conc.flatten(),det.flatten())

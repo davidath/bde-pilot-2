@@ -1,4 +1,5 @@
 #!/bin/bash
+cp /bde-pilot-2/pilot/data_ingest/db_info.json .
 cd /bde-pilot-2/pilot/detection_listener/sc5_backend/
 rm -f *.zip
 killall -9 redis-server
