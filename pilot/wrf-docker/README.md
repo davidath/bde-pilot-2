@@ -30,7 +30,7 @@ template.sh
 Configuration files used in WRF for our experiments, that are not included in the dockerized version.
 
 #### Additional script files
-Some additional scripts are included for specific processes but are not required in order to perform WPS/WRF
+Some additional scripts are included for specific processes but are not required in order to run WPS/WRF
 * ```process_dataset.py``` is the main script used for converting NCAR grib files to netCDF4 (retrieves files from /home/wrf/data/grib/ runs WPS and then WRF
 * ```split.py``` main script used when NetCDF data are available and we want to only run WRF (it is called split because we need to split the files using ```ncsplitcluster.sh```)
 * ```breakdown.py``` breaks down a NetCDF file containing multiple timeframes to 3day periods
