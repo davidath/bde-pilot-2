@@ -22,6 +22,8 @@ RUN cp -rp /bde-pilot-2/pilot/Sextant_v2.0/assets/ /tomcat/webapps/Sextant_v2.0/
 RUN cp /bde-pilot-2/pilot/Sextant_v2.0/index.html /tomcat/webapps/Sextant_v2.0/
 RUN cp -rp /bde-pilot-2/pilot/Sextant_v2.0/data/ /tomcat/webapps/Sextant_v2.0/
 RUN pip install -r /bde-pilot-2/pilot/requirements.txt
+RUN pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip
+RUN pip install --upgrade https://github.com/Theano/Theano/archive/master.zip
 
 RUN chmod +x /*.sh
 
