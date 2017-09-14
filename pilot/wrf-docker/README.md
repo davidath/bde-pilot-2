@@ -40,7 +40,7 @@ Some additional scripts are included for specific processes but are not required
 
 
 # Original based docker md
-
+https://github.com/rdccosmo/containered-wrf-data
 > #rdccosmo/containered-wrf-data
 This project aims to dockerize the [WRF (Weather Research and Forecast Model)](http://www.wrf-model.org/index.php).
 >
