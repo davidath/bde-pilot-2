@@ -1,7 +1,7 @@
 """
    SCRIPT INFO
    ---------------------------------------------------------------------------
-   This script acts a controller for the SC5 #2 and #3 pilot. It controls the
+   This script acts a controller for the SC5 #3 pilot. It controls the
    flow of the UI by calling the appropiate functions and returning their
    respective results.
    ---------------------------------------------------------------------------

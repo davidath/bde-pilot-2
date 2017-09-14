@@ -1,7 +1,7 @@
 """
    CLASS INFO
    ---------------------------------------------------------------------------
-   This class acts as the model (from MVC framework) for the SC5 #2 and #3 pilot.
+   This class acts as the model (from MVC framework) for the SC5 #3 pilot.
    ---------------------------------------------------------------------------
 """
 

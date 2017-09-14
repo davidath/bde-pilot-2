@@ -1,7 +1,7 @@
 """
    CLASS INFO
    ---------------------------------------------------------------------------
-   Handle POSTGRESQL connection and queries
+   Handling POSTGRESQL connection and queries
    ---------------------------------------------------------------------------
 """
 from sqlalchemy import create_engine

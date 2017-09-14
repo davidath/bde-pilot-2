@@ -10,13 +10,20 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /pilot_data
+RUN git clone http://github.com/davidath/bde-pilot-2.git
+RUN rm -rf /tomcat/webapps/Sextant_v2.0/assets/
+RUN rm -rf /tomcat/webapps/Sextant_v2.0/index.html
+RUN cp -rp /bde-pilot-2/pilot/Sextant_v2.0/assets/ /tomcat/webapps/Sextant_v2.0/
+RUN cp /bde-pilot-2/pilot/Sextant_v2.0/index.html /tomcat/webapps/Sextant_v2.0/
+RUN cp -rp /bde-pilot-2/pilot/Sextant_v2.0/data/ /tomcat/webapps/Sextant_v2.0/
+RUN pip install -r /bde-pilot-2/pilot/requirements.txt
+RUN pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip
+RUN pip install --upgrade https://github.com/Theano/Theano/archive/master.zip
+RUN /bde-pilot-2/pilot/detection_listener/sc5_backend.sh
 
-
-ADD sc5.sh /sc5.sh
 RUN chmod +x /*.sh
 
 EXPOSE $PORT
 EXPOSE $PORT2
 
 CMD ["/bin/bash", "/sextant.sh"]
-CMD ["/bin/bash", "/sc5.sh"]
