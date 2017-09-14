@@ -8,7 +8,7 @@ psycopg2==2.7
 pywebhdfs==0.4.1
 requests==2.12.3
 scipy==0.16.0
-Shapely==1.6.1
+Shapely==1.5.17.post1
 SQLAlchemy==1.1.11
 Theano==0.9.0
 SPARQLWrapper==1.8.0
