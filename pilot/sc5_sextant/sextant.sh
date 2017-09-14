@@ -5,4 +5,4 @@ if [ ! -f /.tomcat_admin_created ]; then
 fi
 
 
-exec /tomcat/bin/catalina.sh run &
+exec /tomcat/bin/catalina.sh run
