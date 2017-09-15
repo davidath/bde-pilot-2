@@ -2,17 +2,16 @@
 
 #### Setup
 ```sh
-$ cd sc5_sextant
+$ cd sc5_sextant-docker
 $ docker build . -t sc5_sextant
 $ cd ..
 $ docker-compose up -d
-$ docker -D exec -it sc5_sextant bash /sc5.sh
-$ docker -D exec -it sc5_sextant python /bde-pilot-2/pilot/detection_listener/dfs_init.py
 ```
 
 #### RUN
 ```sh
-$ docker -D exec -it sc5_sextant python /bde-pilot-2/pilot/detection_listener/listener.py
+After data ingestion
+$ docker -D exec -it sc5_sextant bash /bde-pilot-2/backend/sc5_backend.sh
 ```
 
 #### Info
